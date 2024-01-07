@@ -4,12 +4,9 @@ const Dotenv = require('dotenv-webpack')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const path = require('path')
+const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin')
 const webpack = require('webpack')
 const WebpackAssetsManifest = require('webpack-assets-manifest')
-
-const tsPaths = require('./tsconfig.paths.json').compilerOptions.paths
-
-process.env.USE_WEBPACK = 'true'
 
 module.exports = (env, argv) => {
   const isDev = argv.mode === 'development'
@@ -21,6 +18,9 @@ module.exports = (env, argv) => {
     },
     devServer: {
       allowedHosts: 'all',
+      client: {
+        overlay: false,
+      },
       devMiddleware: {
         writeToDisk: true,
       },
@@ -33,25 +33,53 @@ module.exports = (env, argv) => {
     },
     devtool: isDev ? 'eval-source-map' : 'source-map',
     entry: [
-      path.join(__dirname, '/src/index.tsx'),
-      path.join(__dirname, '/src/index.css'),
-      ...(isDev ? ['react', 'react-dom', 'react-refresh/runtime'] : []),
+      path.resolve(__dirname, './src/index.tsx'),
+      ...(isDev
+        ? [require.resolve('react'), require.resolve('react-dom'), require.resolve('react-refresh/runtime')]
+        : []),
     ],
     mode: argv.mode,
     module: {
       rules: [
         {
+          test: /\.html$/,
+          use: ['html-loader'],
+        },
+        {
           exclude: /node_modules/,
-          test: /\.tsx?$/,
+          test: /\.[cjt]sx?$/,
           use: [
             {
-              loader: 'esbuild-loader',
+              loader: 'swc-loader',
               options: {
-                loader: 'tsx',
-                target: 'es2015', // Or 'ts' if you don't need tsx
+                jsc: {
+                  parser: {
+                    decorators: true,
+                    dynamicImport: true,
+                    syntax: 'typescript',
+                    tsx: true,
+                  },
+                  transform: {
+                    react: {
+                      development: isDev,
+                      refresh: isDev,
+                      runtime: 'automatic',
+                    },
+                  },
+                },
+                module: {
+                  type: 'es6',
+                },
               },
             },
           ],
+        },
+        {
+          generator: {
+            filename: 'static/images/[name][ext]',
+          },
+          test: /\.(png|jpe?g|gif|svg|ico)$/i,
+          type: 'asset/resource',
         },
         {
           test: /\.css$/,
@@ -73,24 +101,20 @@ module.exports = (env, argv) => {
             chunks: 'all',
             name: 'shared',
           },
-          usedExports: true,
         },
     output: {
       chunkFilename: 'static/js/[name].chunk.[contenthash:8].js',
       clean: true,
       filename: 'static/js/[name].[contenthash:8].js',
-      path: path.join(__dirname, 'build'),
+      path: path.resolve(__dirname, 'dist'),
       publicPath: '/',
     },
     plugins: [
-      new webpack.ProvidePlugin({
-        Buffer: ['buffer', 'Buffer'],
-      }),
       new HtmlWebpackPlugin({
         cache: isDev,
         chunks: 'all',
         chunksSortMode: 'auto',
-        favicon: path.join(__dirname, './public/favicon.png'),
+        favicon: path.resolve(__dirname, './public/favicon.png'),
         filename: 'index.html',
         inject: true,
         minify: isDev
@@ -108,48 +132,47 @@ module.exports = (env, argv) => {
       new CopyPlugin({
         patterns: [
           {
-            from: 'public/_redirects',
+            from: './public/_redirects',
             to: '_redirects',
           },
           {
-            from: 'public/robots.txt',
+            from: './public/robots.txt',
             to: 'robots.txt',
           },
           {
-            from: 'public/favicon.png',
+            from: './public/favicon.png',
             to: 'favicon.png',
           },
         ],
       }),
       new Dotenv({
         allowEmptyValues: true,
-        defaults: false,
-        path: path.join(__dirname, `/${process.env.NODE_ENV ? `.env.${process.env.NODE_ENV}` : `.env.dev`}`),
+        path: path.resolve(__dirname, `../../${process.env.NODE_ENV ? `.env.${process.env.NODE_ENV}` : `.env.local`}`),
         safe: true,
         silent: true,
-        systemvars: true,
       }),
-      new MiniCssExtractPlugin({
-        chunkFilename: 'static/css/[id].[chunkhash].css',
-        filename: 'static/css/[name].[fullhash].css',
-      }),
-      new CompressionPlugin(),
-      new WebpackAssetsManifest(),
+      ...(isDev
+        ? [new ReactRefreshWebpackPlugin({ overlay: false })]
+        : [
+            new MiniCssExtractPlugin({
+              chunkFilename: 'static/css/[id].[chunkhash].css',
+              filename: 'static/css/[name].[fullhash].css',
+            }),
+            new CompressionPlugin(),
+            new webpack.DefinePlugin({
+              'process.env': JSON.stringify({
+                NODE_ENV: 'production',
+              }),
+            }),
+            new WebpackAssetsManifest(),
+          ]),
     ],
     resolve: {
-      alias: {
-        ...Object.keys(tsPaths).reduce(
-          (acc, key) => ({
-            ...acc,
-            [key.replace('/*', '')]: path.resolve(__dirname, `./${tsPaths[key][0].replace('/*', '')}`),
-          }),
-          {},
-        ),
-      },
-      extensions: ['.js', '.jsx', '.ts', '.tsx'],
+      extensions: ['.cjs', '.js', '.jsx', '.json', '.css', '.mjs', '.ts', '.tsx'],
       fallback: {
         path: require.resolve('path-browserify'),
       },
+      modules: [path.resolve(__dirname, '../../node_modules'), path.resolve(__dirname, './node_modules')],
     },
     target: isDev ? 'web' : 'browserslist',
   }

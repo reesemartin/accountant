@@ -1,10 +1,10 @@
 # Accountant
 
-Simple accounting app for personal use.
+Accounting assistant tool. Recommended free hosting on [Netlify](https://www.netlify.com/) and database on [PlanetScale](https://www.planetscale.com/).
 
 ## Installation
 
-![node](https://img.shields.io/badge/node-v18.12.0-brightgreen.svg?style=for-the-badge)
+![node](https://img.shields.io/badge/node-v20.10.0-brightgreen.svg?style=for-the-badge)
 
 > **Requirements**: Depending on your preferred node manager, set the required node version. NodeJS `(v.18.12.0)`. If you're using [nvm](https://github.com/nvm-sh/nvm), run `nvm use` to ensure you're using the same Node version in local and in your lambda's runtime.
 
@@ -12,8 +12,38 @@ Simple accounting app for personal use.
 nvm use
 ```
 
+If you haven't already installed `yarn` then `corepack enable`
+
 ```bash
 yarn
+```
+
+### Environment variables
+
+Create a `.env.local` file in the root of the project. Replace `local` with the environment you intend to run `local` or `production`. Add the following variables as needed:
+
+| Name              | Package | Description                                        | Default               |
+| ----------------- | ------- | -------------------------------------------------- | --------------------- |
+| DATABASE_PASSWORD | SERVER  | Password for the database                          |                       |
+| DATABASE_URL      | SERVER  | Hostname of the database                           |                       |
+| DATABASE_USERNAME | SERVER  | Username for the database                          |                       |
+| LOG_QUERIES       | SERVER  | Log all queries to the console                     | false                 |
+| REACT_APP_API_URL | UI      | Url for the running instance of the server package | http://localhost:3001 |
+
+## Running the app
+
+```bash
+yarn prisma:gen
+```
+
+In separate terminals run:
+
+```bash
+yarn dev:server
+```
+
+```bash
+yarn dev:ui
 ```
 
 ## Contributing

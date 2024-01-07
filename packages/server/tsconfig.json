@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "baseUrl": "./src",
+    "module": "commonjs",
+    "outDir": "./dist",
+    "target": "ES2022"
+  },
+  "extends": "./../../tsconfig.json",
+  "include": ["./src"]
+}
