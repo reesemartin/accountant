@@ -29,7 +29,6 @@ node_modules/
 .env
 .env.local
 .env.production
-.env.test
 
 # yarn v2
 .yarn/cache

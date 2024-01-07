@@ -5,4 +5,6 @@ dist
 .eslintrc.js
 .yarn
 commitlint.config.js
+jest.config.js
+jest.env.setup.js
 webpack.config.js

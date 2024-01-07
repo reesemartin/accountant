@@ -56,7 +56,7 @@
     "prisma:gen": "yarn lerna run prisma:gen --scope=@accountant/server",
     "prisma:pull": "yarn lerna run prisma:pull --scope=@accountant/server",
     "prisma:push": "yarn lerna run prisma:push --scope=@accountant/server",
-    "test": "TZ=UTC yarn lerna run test --scope=@accountant/ui && yarn lerna run test --scope=@accountant/server",
+    "test": "yarn lerna run test --scope=@accountant/ui && yarn lerna run test --scope=@accountant/server",
     "typecheck": "tsc --noEmit"
   },
   "workspaces": {

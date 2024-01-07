@@ -1,6 +1,6 @@
 # Accountant
 
-Accounting assistant tool. Optimized for free hosting on [Netlify](https://www.netlify.com/) and database on [PlanetScale](https://www.planetscale.com/).
+Accounting assistant tool monorepo. Optimized for free hosting on [Netlify](https://www.netlify.com/) and database on [PlanetScale](https://www.planetscale.com/).
 
 ## Installation
 

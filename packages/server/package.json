@@ -43,21 +43,60 @@
     "src"
   ],
   "jest": {
+    "collectCoverageFrom": [
+      "src/**/*.{js,jsx,ts,tsx}"
+    ],
+    "coverageDirectory": "coverage",
+    "extensionsToTreatAsEsm": [
+      ".ts"
+    ],
     "moduleFileExtensions": [
       "js",
-      "json",
-      "ts"
+      "jsx",
+      "ts",
+      "tsx"
     ],
-    "rootDir": "src",
-    "testRegex": ".*\\.spec\\.ts$",
+    "preset": "ts-jest",
+    "roots": [
+      "."
+    ],
+    "setupFiles": [
+      "./../../jest.env.setup.js"
+    ],
+    "setupFilesAfterEnv": [
+      "./src/jestSetup.ts"
+    ],
+    "testEnvironment": "node",
+    "testMatch": [
+      "**/__tests__/**/*.+(ts|tsx|js)",
+      "**/?(*.)+(spec|test).+(ts|tsx|js)"
+    ],
     "transform": {
-      "^.+\\.(t|j)s$": "ts-jest"
+      "^.+\\.(js|jsx|ts|tsx)$": [
+        "@swc/jest",
+        {
+          "jsc": {
+            "parser": {
+              "decorators": true,
+              "dynamicImport": true,
+              "syntax": "typescript",
+              "tsx": true
+            },
+            "transform": {
+              "decoratorMetadata": true,
+              "legacyDecorator": true
+            },
+            "target": "es2022"
+          },
+          "module": {
+            "type": "es6"
+          }
+        }
+      ]
     },
-    "collectCoverageFrom": [
-      "**/*.(t|j)s"
-    ],
-    "coverageDirectory": "../coverage",
-    "testEnvironment": "node"
+    "transformIgnorePatterns": [
+      "/node_modules/(?!nanoid).+\\.(js|jsx|ts|tsx)$"
+    ]
   },
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",
@@ -72,7 +111,7 @@
     "prisma:pull": "yarn prisma db pull",
     "prisma:push": "yarn prisma db push",
     "start:prod": "NODE_ENV=production node dist/main",
-    "test": "jest",
+    "test": "TZ=UTC NODE_ENV=test jest",
     "test:cov": "jest --coverage",
     "typecheck": "tsc --noEmit --incremental false"
   },
