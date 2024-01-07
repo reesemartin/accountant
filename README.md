@@ -1,12 +1,12 @@
 # Accountant
 
-Accounting assistant tool. Recommended free hosting on [Netlify](https://www.netlify.com/) and database on [PlanetScale](https://www.planetscale.com/).
+Accounting assistant tool. Optimized for free hosting on [Netlify](https://www.netlify.com/) and database on [PlanetScale](https://www.planetscale.com/).
 
 ## Installation
 
 ![node](https://img.shields.io/badge/node-v20.10.0-brightgreen.svg?style=for-the-badge)
 
-> **Requirements**: Depending on your preferred node manager, set the required node version. NodeJS `(v.18.12.0)`. If you're using [nvm](https://github.com/nvm-sh/nvm), run `nvm use` to ensure you're using the same Node version in local and in your lambda's runtime.
+> **Requirements**: Depending on your preferred node manager, set the required node version. NodeJS `(v.20.10.0)`. If you're using [nvm](https://github.com/nvm-sh/nvm), run `nvm use` to ensure you're using the same Node version in local and in your lambda's runtime.
 
 ```bash
 nvm use
@@ -45,6 +45,8 @@ yarn dev:server
 ```bash
 yarn dev:ui
 ```
+
+Your app is now running on [http://localhost:3000](http://localhost:3000) with server api accessible at [http://localhost:3001](http://localhost:3001).
 
 ## Contributing
 
