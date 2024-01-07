@@ -5,9 +5,7 @@ const NODE_ENV = process.env.NODE_ENV || 'local'
 
 const envFile = load(
   {
-    DATABASE_PASSWORD: String,
     DATABASE_URL: String,
-    DATABASE_USERNAME: String,
     LOG_QUERIES: Boolean,
   },
   {
