@@ -59,3 +59,9 @@ Commits should be in the format of `type: what you did` for example:
 
 Here is a decent rundown of possible types: [conventional-commit-types
 ](https://github.com/commitizen/conventional-commit-types/blob/c3a9be4c73e47f2e8197de775f41d981701407fb/index.json)
+
+## Deployment
+
+### Netlify
+
+If deploying to netlify, a netlify.toml file has been included to handle the build and deployment process. Connect your repository to Netlify for automated deployment. The only thing you need to do is add the environmental variables listed above to your netlify site.

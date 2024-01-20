@@ -143,15 +143,17 @@ module.exports = (env, argv) => {
         ],
       }),
       ...(!isNetlify
-        ? new Dotenv({
-            allowEmptyValues: true,
-            path: path.resolve(
-              __dirname,
-              `../../${process.env.NODE_ENV ? `.env.${process.env.NODE_ENV}` : `.env.local`}`,
-            ),
-            safe: true,
-            silent: true,
-          })
+        ? [
+            new Dotenv({
+              allowEmptyValues: true,
+              path: path.resolve(
+                __dirname,
+                `../../${process.env.NODE_ENV ? `.env.${process.env.NODE_ENV}` : `.env.local`}`,
+              ),
+              safe: true,
+              silent: true,
+            }),
+          ]
         : []),
       ...(isDev
         ? [new ReactRefreshWebpackPlugin({ overlay: false })]

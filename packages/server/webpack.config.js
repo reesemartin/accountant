@@ -112,21 +112,23 @@ module.exports = {
         }),
     ),
     ...(!isNetlify
-      ? new CopyWebpackPlugin({
-          patterns: [
-            {
-              from: path.resolve(
-                __dirname,
-                `../../${process.env.NODE_ENV ? `.env.${process.env.NODE_ENV}` : `.env.local`}`,
-              ),
+      ? [
+          new CopyWebpackPlugin({
+            patterns: [
+              {
+                from: path.resolve(
+                  __dirname,
+                  `../../${process.env.NODE_ENV ? `.env.${process.env.NODE_ENV}` : `.env.local`}`,
+                ),
 
-              to: path.resolve(
-                __dirname,
-                `./dist/${process.env.NODE_ENV ? `.env.${process.env.NODE_ENV}` : `.env.local`}`,
-              ),
-            },
-          ],
-        })
+                to: path.resolve(
+                  __dirname,
+                  `./dist/${process.env.NODE_ENV ? `.env.${process.env.NODE_ENV}` : `.env.local`}`,
+                ),
+              },
+            ],
+          }),
+        ]
       : []),
   ],
   resolve: {
