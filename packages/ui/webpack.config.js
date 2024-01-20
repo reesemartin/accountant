@@ -10,6 +10,7 @@ const WebpackAssetsManifest = require('webpack-assets-manifest')
 
 module.exports = (env, argv) => {
   const isDev = argv.mode === 'development'
+  const isNetlify = process.env.NETLIFY === 'true'
 
   return {
     cache: {
@@ -145,12 +146,17 @@ module.exports = (env, argv) => {
           },
         ],
       }),
-      new Dotenv({
-        allowEmptyValues: true,
-        path: path.resolve(__dirname, `../../${process.env.NODE_ENV ? `.env.${process.env.NODE_ENV}` : `.env.local`}`),
-        safe: true,
-        silent: true,
-      }),
+      ...(!isNetlify
+        ? new Dotenv({
+            allowEmptyValues: true,
+            path: path.resolve(
+              __dirname,
+              `../../${process.env.NODE_ENV ? `.env.${process.env.NODE_ENV}` : `.env.local`}`,
+            ),
+            safe: true,
+            silent: true,
+          })
+        : []),
       ...(isDev
         ? [new ReactRefreshWebpackPlugin({ overlay: false })]
         : [
@@ -159,11 +165,13 @@ module.exports = (env, argv) => {
               filename: 'static/css/[name].[fullhash].css',
             }),
             new CompressionPlugin(),
-            new webpack.DefinePlugin({
-              'process.env': JSON.stringify({
-                NODE_ENV: 'production',
-              }),
-            }),
+            ...(!isNetlify
+              ? new webpack.DefinePlugin({
+                  'process.env': JSON.stringify({
+                    NODE_ENV: 'production',
+                  }),
+                })
+              : []),
             new WebpackAssetsManifest(),
           ]),
     ],

@@ -11,6 +11,8 @@ const ignores = [
   /^class-transformer\/storage/,
 ]
 
+const isNetlify = process.env.NETLIFY === 'true'
+
 module.exports = {
   cache: {
     compression: 'gzip',
@@ -109,18 +111,23 @@ module.exports = {
           resourceRegExp,
         }),
     ),
-    new CopyWebpackPlugin({
-      patterns: [
-        {
-          from: path.resolve(
-            __dirname,
-            `../../${process.env.NODE_ENV ? `.env.${process.env.NODE_ENV}` : `.env.local`}`,
-          ),
+    ...(!isNetlify
+      ? new CopyWebpackPlugin({
+          patterns: [
+            {
+              from: path.resolve(
+                __dirname,
+                `../../${process.env.NODE_ENV ? `.env.${process.env.NODE_ENV}` : `.env.local`}`,
+              ),
 
-          to: path.resolve(__dirname, `./dist/${process.env.NODE_ENV ? `.env.${process.env.NODE_ENV}` : `.env.local`}`),
-        },
-      ],
-    }),
+              to: path.resolve(
+                __dirname,
+                `./dist/${process.env.NODE_ENV ? `.env.${process.env.NODE_ENV}` : `.env.local`}`,
+              ),
+            },
+          ],
+        })
+      : []),
   ],
   resolve: {
     extensions: ['.cjs', '.js', '.json', '.jsx', '.mjs', '.ts', '.tsx'],
