@@ -1,0 +1,15 @@
+[build]
+  base = "."
+  command = "yarn build"
+  functions = "./packages/server/dist"
+  publish = "./packages/ui/dist"
+
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/main/api/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
