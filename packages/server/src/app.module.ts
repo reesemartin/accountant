@@ -9,7 +9,7 @@ import { HealthController } from './health/health.controller'
   controllers: [HealthController],
   imports: [
     LoggerModule.forRoot({
-      exclude: ['/v1/health'],
+      exclude: ['/api/v1/health'],
       pinoHttp: {
         autoLogging: true,
       },

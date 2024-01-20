@@ -2,7 +2,7 @@ import { Controller, Get } from '@nestjs/common'
 
 import { PrismaService } from 'nestjs-prisma'
 
-@Controller('v1/health')
+@Controller('api/v1/health')
 export class HealthController {
   constructor(private prisma: PrismaService) {}
 
