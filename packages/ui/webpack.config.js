@@ -165,13 +165,18 @@ module.exports = (env, argv) => {
               filename: 'static/css/[name].[fullhash].css',
             }),
             new CompressionPlugin(),
-            ...(!isNetlify
-              ? new webpack.DefinePlugin({
-                  'process.env': JSON.stringify({
-                    NODE_ENV: 'production',
+            new webpack.DefinePlugin({
+              'process.env.NODE_ENV': JSON.stringify('production'),
+              ...Object.entries(process.env)
+                .filter(([key]) => key.startsWith('REACT_APP_'))
+                .reduce(
+                  (acc, [key, value]) => ({
+                    ...acc,
+                    [`process.env.${key}`]: JSON.stringify(value),
                   }),
-                })
-              : []),
+                  {},
+                ),
+            }),
             new WebpackAssetsManifest(),
           ]),
     ],
