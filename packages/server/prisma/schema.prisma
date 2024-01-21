@@ -12,10 +12,10 @@ generator client {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique @db.VarChar(255)
-  name      String?  @db.VarChar(255)
-  password  String   @db.VarChar(255)
-  salt      String   @db.VarChar(255)
-  createdAt DateTime @map("created_at") @db.Timestamp(6) @default(now())
+  id           Int      @id @default(autoincrement())
+  email        String   @unique @db.VarChar(255)
+  name         String?  @db.VarChar(255)
+  password     String   @db.VarChar(255)
+  refreshToken String?  @map("refresh_token") @db.VarChar(255)
+  createdAt    DateTime @map("created_at") @db.Timestamp(6) @default(now())
 }

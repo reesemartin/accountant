@@ -6,7 +6,9 @@ const NODE_ENV = process.env.NODE_ENV || 'local'
 const envFile = load(
   {
     DATABASE_URL: String,
+    JWT_SECRET: String,
     LOG_QUERIES: Boolean,
+    REFRESH_JWT_SECRET: String,
   },
   {
     overrideProcessEnv: false,

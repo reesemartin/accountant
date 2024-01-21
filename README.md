@@ -22,11 +22,13 @@ yarn
 
 Create a `.env.local` file in the root of the project. Replace `local` with the environment you intend to run `local` or `production`. Add the following variables as needed:
 
-| Name              | Package | Description                                                       | Default               |
-| ----------------- | ------- | ----------------------------------------------------------------- | --------------------- |
-| DATABASE_URL      | SERVER  | Url containing the user, host, port, and password of the database |                       |
-| LOG_QUERIES       | SERVER  | Log all queries to the console                                    | false                 |
-| REACT_APP_API_URL | UI      | Url for the running instance of the server package                | http://localhost:3001 |
+| Name               | Package | Description                                                       | Default               |
+| ------------------ | ------- | ----------------------------------------------------------------- | --------------------- |
+| DATABASE_URL       | SERVER  | Url containing the user, host, port, and password of the database |                       |
+| JWT_SECRET         | SERVER  | Secret used to sign JWT tokens                                    |                       |
+| LOG_QUERIES        | SERVER  | Log all queries to the console                                    | false                 |
+| REACT_APP_API_URL  | UI      | Url for the running instance of the server package                | http://localhost:3001 |
+| REFRESH_JWT_SECRET | SERVER  | Secret used to sign refresh JWT tokens                            |                       |
 
 ## Running the app
 
