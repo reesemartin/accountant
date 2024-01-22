@@ -1,12 +1,9 @@
-import ApiQueryService from '../ApiQueryService/ApiQueryService'
+import { ApiQueryService } from '../ApiQueryService/ApiQueryService'
 
 export class HealthService {
   static async get() {
-    const apiQueryRequest = {
+    return await new ApiQueryService().get<{ healthy: boolean }>({
       endpoint: `api/v1/health`,
-    }
-
-    const apiQueryService = new ApiQueryService()
-    return await apiQueryService.get<{ healthy: boolean }>(apiQueryRequest)
+    })
   }
 }

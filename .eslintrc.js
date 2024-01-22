@@ -37,6 +37,7 @@ module.exports = {
     'no-console': ['warn', { allow: ['warn', 'error'] }],
     'prettier/prettier': 'warn',
     'react/react-in-jsx-scope': 'off',
+    'react-hooks/exhaustive-deps': 'off',
     'sort-keys': 0, // disable default eslint sort-keys
     'sort-keys/sort-keys-fix': 1,
   },

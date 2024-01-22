@@ -1,7 +1,9 @@
 import axios, { AxiosError, CancelToken, isAxiosError } from 'axios'
 import axiosRetry from 'axios-retry'
 
-export default class ApiQueryService {
+import { AuthService } from './..'
+
+export class ApiQueryService {
   private apiUrl: string
 
   constructor() {
@@ -48,6 +50,7 @@ export default class ApiQueryService {
     cancelToken?: CancelToken
     params?: unknown
   }): Promise<T> {
+    await this.tokenCheck()
     const response = await axios
       .get(`${this.apiUrl}${this.formatEndpoint(event.endpoint)}`, {
         cancelToken: event.cancelToken,
@@ -63,6 +66,7 @@ export default class ApiQueryService {
   }
 
   public async post<T>(event: { endpoint: string; data?: unknown; headers?: Record<string, string> }): Promise<T> {
+    await this.tokenCheck()
     const response = await axios
       .post(`${this.apiUrl}${this.formatEndpoint(event.endpoint)}`, event.data, {
         headers: this.setHeaders(event.headers),
@@ -72,6 +76,7 @@ export default class ApiQueryService {
   }
 
   public async patch<T>(event: { endpoint: string; data?: unknown; headers?: Record<string, string> }): Promise<T> {
+    await this.tokenCheck()
     const response = await axios
       .patch(`${this.apiUrl}${this.formatEndpoint(event.endpoint)}`, event.data, {
         headers: this.setHeaders(event.headers),
@@ -81,6 +86,7 @@ export default class ApiQueryService {
   }
 
   public async delete<T>(event: { endpoint: string; headers?: Record<string, string> }): Promise<T> {
+    await this.tokenCheck()
     const response = await axios
       .delete(`${this.apiUrl}${this.formatEndpoint(event.endpoint)}`, {
         headers: this.setHeaders(event.headers),
@@ -114,11 +120,47 @@ export default class ApiQueryService {
     return endpoint
   }
 
+  private async tokenCheck() {
+    const token = AuthService.getAccessToken()
+    if (!token) {
+      // not logged in so nothing to refresh
+      return
+    }
+
+    if (!AuthService.checkToken(AuthService.getRefreshToken())) {
+      // refresh token is expired so don't try refreshing
+      // TODO: Trigger logout
+      return
+    }
+
+    if (!AuthService.checkToken(token)) {
+      await this.refreshTokens()
+    }
+  }
+
+  private async refreshTokens() {
+    const response = await axios
+      .get<{
+        accessToken: string
+        refreshToken: string
+      }>(`${this.apiUrl}/api/v1/auth/refresh`, {
+        headers: this.setHeaders({
+          Authorization: `Bearer ${AuthService.getRefreshToken()}`,
+        }),
+      })
+      .catch(this.handleError)
+    if (!response?.data?.accessToken || !response?.data?.refreshToken) {
+      throw new Error('Unable to refresh tokens')
+    }
+    AuthService.setAccessToken(response.data.accessToken)
+    AuthService.setRefreshToken(response.data.refreshToken)
+  }
+
   private setHeaders(headers?: Record<string, string>): Record<string, string> {
+    const accessToken = AuthService.getAccessToken()
     return {
-      ...{
-        'Content-Type': 'application/json',
-      },
+      ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+      'Content-Type': 'application/json',
       ...headers,
     }
   }

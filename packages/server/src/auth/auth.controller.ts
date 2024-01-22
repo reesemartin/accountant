@@ -1,8 +1,9 @@
-import { Controller, Get, HttpException, HttpStatus, Post, Req, UseGuards } from '@nestjs/common'
+import { Controller, Get, HttpException, HttpStatus, Logger, Post, Req, UseGuards } from '@nestjs/common'
 import { User } from '@prisma/client'
 
 import { compareSync, genSaltSync, hashSync } from 'bcryptjs'
 import { Request } from 'express'
+import { PrismaService } from 'nestjs-prisma'
 
 import { UserService } from './../user/user.service'
 import { AuthService } from './auth.service'
@@ -11,10 +12,15 @@ import { RefreshTokenGuard } from './refreshToken.guard'
 
 @Controller('api/v1/auth')
 export class AuthController {
+  private readonly logger: Logger
+
   constructor(
     private authService: AuthService,
+    private prisma: PrismaService,
     private userService: UserService,
-  ) {}
+  ) {
+    this.logger = new Logger(AuthController.name)
+  }
 
   @Post('register')
   async register(@Req() req: Request<{ name?: string; email: string; password: string }>) {
@@ -66,12 +72,38 @@ export class AuthController {
       throw new HttpException('Invalid credentials', HttpStatus.BAD_REQUEST)
     }
 
+    if (req.ip && (await this.authService.checkIpLockout({ ip: req.ip, userId: user.id }))) {
+      throw new HttpException('Too many failed login attempts', HttpStatus.FORBIDDEN)
+    }
+
     if (!compareSync(req.body.password, user.password)) {
+      if (req.ip) {
+        await this.prisma.loginAttempt.create({
+          data: {
+            ip: req.ip,
+            success: false,
+            userId: user.id,
+          },
+        })
+      }
       throw new HttpException('Invalid credentials', HttpStatus.BAD_REQUEST)
     }
 
     const tokens = await this.authService.getTokens({ email: user.email, userId: user.id })
     await this.userService.update({ id: user.id, refreshToken: hashSync(tokens.refreshToken, genSaltSync(10)) })
+
+    try {
+      await this.prisma.loginAttempt.create({
+        data: {
+          ip: req.ip,
+          success: true,
+          userId: user.id,
+        },
+      })
+    } catch (error) {
+      // we don't prevent logging in just because we fail to log the attempt
+      this.logger.error(error)
+    }
 
     return {
       ...this.formatUser(user),

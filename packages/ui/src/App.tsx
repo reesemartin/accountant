@@ -7,18 +7,17 @@ import { QueryClient, QueryClientProvider, QueryErrorResetBoundary } from '@tans
 
 import { Suspense } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
-import { BrowserRouter, Route, Routes } from 'react-router-dom'
 
 import AppTheme from './App.theme'
-import { Home } from './pages/Home'
+import { AppRouter } from './router'
 
-// Create a client
+// react query defaults
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       refetchOnWindowFocus: false,
       retry: false,
-      staleTime: 5 * (60 * 1000), // 5 mins
+      staleTime: 5 * 60 * 1000, // 5 mins
     },
   },
 })
@@ -46,11 +45,7 @@ function App() {
                   </Stack>
                 }
               >
-                <BrowserRouter>
-                  <Routes>
-                    <Route path="/" element={<Home />} />
-                  </Routes>
-                </BrowserRouter>
+                <AppRouter />
               </Suspense>
             </ErrorBoundary>
           )}

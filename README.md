@@ -67,3 +67,14 @@ Here is a decent rundown of possible types: [conventional-commit-types
 ### Netlify
 
 If deploying to netlify, a netlify.toml file has been included to handle the build and deployment process. Connect your repository to Netlify for automated deployment. The only thing you need to do is add the environmental variables listed above to your netlify site.
+
+## Todo
+
+- [ ] Fix import paths
+- [ ] App header layout
+- [ ] Snackbar provider
+- [ ] Auto refresh if api version is out of date
+- [ ] Auto generate hooks package from api endpoints for ui to use to replace the local hooks folder and http service classes
+- [ ] Registration form with ENV to toggle access for apps that don't need registration or temporary registration shutdown
+- [ ] Automate sending users to the login route if there is an error during token refresh
+- [ ] Add tests

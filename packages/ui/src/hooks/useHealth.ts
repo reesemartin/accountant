@@ -6,7 +6,7 @@ type Health = {
   healthy: boolean
 }
 
-export default function useHealth(
+export function useHealth(
   config?: Omit<UseSuspenseQueryOptions<Health, Error, Health, QueryKey>, 'queryFn' | 'queryKey'>,
 ) {
   return useSuspenseQuery<Health>({
