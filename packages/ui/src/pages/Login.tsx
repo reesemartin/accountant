@@ -5,8 +5,8 @@ import { FC, useCallback, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import * as yup from 'yup'
 
-import { LoginParams, useAuthLogin } from '../hooks'
-import { AuthService } from './../services'
+import { LoginDTO, useAuthLogin } from '../hooks'
+import { AuthService } from '../services'
 
 const validationSchema = yup.object().shape({
   email: yup.string().email('Enter a valid email').required('Email is required'),
@@ -23,11 +23,14 @@ export const Login: FC = () => {
   const navigate = useNavigate()
   const login = useAuthLogin()
 
-  const onSubmit = useCallback(async (values: LoginParams) => {
-    await login.mutateAsync(values)
+  const onSubmit = useCallback(
+    async (values: LoginDTO) => {
+      await login.mutateAsync(values)
 
-    navigate(searchParams.get('redirect') || '/')
-  }, [])
+      navigate(searchParams.get('redirect') || '/')
+    },
+    [searchParams],
+  )
 
   useEffect(() => {
     if (AuthService.getAccessToken()) {
@@ -36,7 +39,7 @@ export const Login: FC = () => {
   }, [])
 
   return (
-    <Grid alignItems="center" container height="100vh" justifyContent="center" spacing={4} width="100vw">
+    <Grid alignItems="center" container height="100%" justifyContent="center" spacing={4} width="100%">
       <Grid xs={12} sm={8}>
         <Formik
           initialValues={{

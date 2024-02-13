@@ -20,7 +20,6 @@
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-sort-keys": "^2.3.5",
     "husky": "^8.0.3",
-    "lerna": "^8.0.2",
     "lint-staged": "^15.2.0",
     "prettier": "^3.1.1",
     "prettier-plugin-organize-attributes": "^1.0.0",
@@ -63,5 +62,8 @@
     "packages": [
       "packages/*"
     ]
+  },
+  "dependencies": {
+    "lerna": "^8.1.2"
   }
 }

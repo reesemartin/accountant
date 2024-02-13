@@ -1,6 +1,6 @@
 import { QueryKey, useSuspenseQuery, UseSuspenseQueryOptions } from '@tanstack/react-query'
 
-import { HealthService } from './../services'
+import { ApiQueryService } from '../services'
 
 type Health = {
   healthy: boolean
@@ -11,7 +11,10 @@ export function useHealth(
 ) {
   return useSuspenseQuery<Health>({
     ...config,
-    queryFn: () => HealthService.get(),
-    queryKey: ['HealthService.get'],
+    queryFn: async () =>
+      new ApiQueryService().get<{ healthy: boolean }>({
+        endpoint: 'api/v1/health',
+      }),
+    queryKey: ['api/v1/health'],
   })
 }

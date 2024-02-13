@@ -5,6 +5,7 @@ import { PrismaModule } from 'nestjs-prisma'
 
 import { AuthModule } from './auth/auth.module'
 import { HealthController } from './health/health.controller'
+import { TransactionModule } from './transaction/transaction.module'
 import { UserModule } from './user/user.module'
 
 @Module({
@@ -31,6 +32,7 @@ import { UserModule } from './user/user.module'
         },
       },
     }),
+    TransactionModule,
   ],
   providers: [],
 })

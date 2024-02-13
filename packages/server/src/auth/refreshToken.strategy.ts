@@ -20,8 +20,8 @@ export class RefreshTokenStrategy extends PassportStrategy(Strategy, 'jwt-refres
   async validate(req: Request, payload: { sub?: string; email?: string }) {
     return {
       email: payload.email,
+      id: payload.sub,
       refreshToken: req.headers?.authorization?.replace('Bearer', '').trim(),
-      userId: payload.sub,
     }
   }
 }

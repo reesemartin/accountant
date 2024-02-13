@@ -1,36 +1,14 @@
-import { ApiQueryService } from '../ApiQueryService/ApiQueryService'
-import { User, UserWithAuth } from './../../models/user.model'
-
 export class AuthService {
-  static async login(params: { email: string; password: string }) {
-    return await new ApiQueryService().post<UserWithAuth>({
-      data: params,
-      endpoint: `api/v1/auth/login`,
-    })
-  }
-
-  static async logout() {
-    return await new ApiQueryService().post<boolean>({
-      endpoint: `api/v1/auth/logout`,
-    })
-  }
-
-  static async me() {
-    return await new ApiQueryService().get<User>({
-      endpoint: `api/v1/auth/me`,
-    })
-  }
-
   static getAccessToken() {
-    return sessionStorage.getItem('accessToken')
+    return localStorage.getItem('accessToken')
   }
 
   static setAccessToken(token: string | null) {
     if (!token) {
-      sessionStorage.removeItem('accessToken')
+      localStorage.removeItem('accessToken')
       return
     }
-    sessionStorage.setItem('accessToken', token)
+    localStorage.setItem('accessToken', token)
   }
 
   static getRefreshToken() {

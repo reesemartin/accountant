@@ -2,7 +2,7 @@ import { CircularProgress, Stack } from '@mui/material'
 
 import { FC, useEffect } from 'react'
 
-import { useAuthLogout } from './../hooks'
+import { useAuthLogout } from '../hooks'
 
 export const Logout: FC = () => {
   const logout = useAuthLogout()

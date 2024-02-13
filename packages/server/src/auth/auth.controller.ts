@@ -1,4 +1,16 @@
-import { Controller, Get, HttpException, HttpStatus, Logger, Post, Req, UseGuards } from '@nestjs/common'
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  ForbiddenException,
+  Get,
+  Ip,
+  Logger,
+  NotFoundException,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common'
 import { User } from '@prisma/client'
 
 import { compareSync, genSaltSync, hashSync } from 'bcryptjs'
@@ -6,6 +18,7 @@ import { Request } from 'express'
 import { PrismaService } from 'nestjs-prisma'
 
 import { UserService } from './../user/user.service'
+import { LoginDTO, RegisterDTO } from './auth.model'
 import { AuthService } from './auth.service'
 import { JwtAuthGuard } from './jwtAuth.guard'
 import { RefreshTokenGuard } from './refreshToken.guard'
@@ -23,29 +36,22 @@ export class AuthController {
   }
 
   @Post('register')
-  async register(@Req() req: Request<{ name?: string; email: string; password: string }>) {
-    if (!req.body.email) {
-      throw new HttpException('Email cannot be empty', HttpStatus.BAD_REQUEST)
-    }
-    if (!req.body.password) {
-      throw new HttpException('Password cannot be empty', HttpStatus.BAD_REQUEST)
-    }
-
-    if (await this.userService.findOne({ email: req.body.email })) {
-      throw new HttpException('Email already in use', HttpStatus.BAD_REQUEST)
+  async register(@Body() body: RegisterDTO) {
+    if (await this.userService.findOne({ email: body.email })) {
+      throw new BadRequestException('Email already in use')
     }
 
     const salt = genSaltSync(10)
-    const hashedPassword = hashSync(req.body.password, salt)
+    const hashedPassword = hashSync(body.password, salt)
 
     const user = await this.userService.create({
-      email: req.body.email,
-      name: req.body.name,
+      email: body.email,
+      name: body.name || null,
       password: hashedPassword,
     })
 
     if (!user) {
-      throw new HttpException('Failed to register user', HttpStatus.INTERNAL_SERVER_ERROR)
+      throw new Error('Failed to register user')
     }
 
     const tokens = await this.authService.getTokens({ email: user.email, userId: user.id })
@@ -58,35 +64,28 @@ export class AuthController {
   }
 
   @Post('login')
-  async login(@Req() req: Request<{ email: string; password: string }>) {
-    if (!req.body.email) {
-      throw new HttpException('Email cannot be empty', HttpStatus.BAD_REQUEST)
-    }
-    if (!req.body.password) {
-      throw new HttpException('Password cannot be empty', HttpStatus.BAD_REQUEST)
-    }
-
-    const user = await this.userService.findOne({ email: req.body.email })
+  async login(@Body() body: LoginDTO, @Ip() ip?: string) {
+    const user = await this.userService.findOne({ email: body.email })
 
     if (!user) {
-      throw new HttpException('Invalid credentials', HttpStatus.BAD_REQUEST)
+      throw new BadRequestException('Invalid credentials')
     }
 
-    if (req.ip && (await this.authService.checkIpLockout({ ip: req.ip, userId: user.id }))) {
-      throw new HttpException('Too many failed login attempts', HttpStatus.FORBIDDEN)
+    if (ip && (await this.authService.checkIpLockout({ ip, userId: user.id }))) {
+      throw new ForbiddenException('Too many failed login attempts')
     }
 
-    if (!compareSync(req.body.password, user.password)) {
-      if (req.ip) {
+    if (!compareSync(body.password, user.password)) {
+      if (ip) {
         await this.prisma.loginAttempt.create({
           data: {
-            ip: req.ip,
+            ip,
             success: false,
             userId: user.id,
           },
         })
       }
-      throw new HttpException('Invalid credentials', HttpStatus.BAD_REQUEST)
+      throw new BadRequestException('Invalid credentials')
     }
 
     const tokens = await this.authService.getTokens({ email: user.email, userId: user.id })
@@ -95,7 +94,7 @@ export class AuthController {
     try {
       await this.prisma.loginAttempt.create({
         data: {
-          ip: req.ip,
+          ip,
           success: true,
           userId: user.id,
         },
@@ -114,17 +113,17 @@ export class AuthController {
   @Post('logout')
   @UseGuards(JwtAuthGuard)
   async logout(@Req() req: Request) {
-    await this.userService.update({ id: req.user?.userId, refreshToken: null })
+    await this.userService.update({ id: req.user?.id, refreshToken: null })
     return true
   }
 
   @Get('me')
   @UseGuards(JwtAuthGuard)
   async me(@Req() req: Request) {
-    const user = req.user?.userId ? await this.userService.findOne({ id: req.user.userId }) : undefined
+    const user = req.user?.id ? await this.userService.findOne({ id: req.user.id }) : undefined
 
     if (!user) {
-      throw new HttpException('User not found', HttpStatus.NOT_FOUND)
+      throw new NotFoundException('User not found')
     }
 
     return this.formatUser(user)
@@ -133,11 +132,11 @@ export class AuthController {
   @Get('refresh')
   @UseGuards(RefreshTokenGuard)
   async refreshTokens(@Req() req: Request) {
-    const user = await this.userService.findOne({ id: req.user.userId })
-    if (!user || !user.refreshToken) throw new HttpException('Invalid refresh token', HttpStatus.FORBIDDEN)
+    const user = await this.userService.findOne({ id: req.user.id })
+    if (!user || !user.refreshToken) throw new ForbiddenException('Invalid refresh token')
 
     const refreshTokenMatches = compareSync(req.user.refreshToken, user.refreshToken)
-    if (!refreshTokenMatches) throw new HttpException('Invalid refresh token', HttpStatus.FORBIDDEN)
+    if (!refreshTokenMatches) throw new ForbiddenException('Invalid refresh token')
 
     const tokens = await this.authService.getTokens({ email: user.email, userId: user.id })
     await this.userService.update({ id: user.id, refreshToken: hashSync(tokens.refreshToken, genSaltSync(10)) })

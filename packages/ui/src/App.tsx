@@ -3,6 +3,8 @@ import '@fontsource/roboto/400.css'
 import '@fontsource/roboto/500.css'
 import '@fontsource/roboto/700.css'
 import { Button, CircularProgress, CssBaseline, Stack, ThemeProvider, Typography } from '@mui/material'
+import { LocalizationProvider } from '@mui/x-date-pickers'
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import { QueryClient, QueryClientProvider, QueryErrorResetBoundary } from '@tanstack/react-query'
 
 import { Suspense } from 'react'
@@ -45,7 +47,9 @@ function App() {
                   </Stack>
                 }
               >
-                <AppRouter />
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                  <AppRouter />
+                </LocalizationProvider>
               </Suspense>
             </ErrorBoundary>
           )}

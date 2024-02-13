@@ -11,19 +11,6 @@ generator client {
   provider = "prisma-client-js"
 }
 
-model User {
-  id            Int      @id @default(autoincrement())
-  email         String   @unique @db.VarChar(255)
-  name          String?  @db.VarChar(255)
-  password      String   @db.VarChar(255)
-  refreshToken  String?  @map("refresh_token") @db.VarChar(255)
-  createdAt     DateTime @map("created_at") @db.Timestamp(6) @default(now())
-  loginAttempts LoginAttempt[]
-
-  @@map("user")
-  @@index([email])
-}
-
 model LoginAttempt {
   id        Int      @id @default(autoincrement())
   ip        String?  @db.VarChar(55)
@@ -34,4 +21,41 @@ model LoginAttempt {
 
   @@map("login_attempt")
   @@index([ip])
+}
+
+model User {
+  id            Int      @id @default(autoincrement())
+  email         String   @unique @db.VarChar(255)
+  loginAttempts LoginAttempt[]
+  name          String?  @db.VarChar(255)
+  password      String   @db.VarChar(255)
+  refreshToken  String?  @map("refresh_token") @db.VarChar(255)
+  transactions  Transaction[]
+  createdAt     DateTime @map("created_at") @db.Timestamp(6) @default(now())
+
+  @@map("user")
+  @@index([email])
+}
+
+model Transaction {
+  id           Int         @id @default(autoincrement())
+  amount       Decimal     @db.Decimal(10,2)
+  description  String      @db.VarChar(500)
+  disabled     Boolean     @default(false)
+  frequency    Frequency?
+  recurring    Boolean     @default(false)
+  startDate    DateTime    @map("start_date") @db.Date
+  userId       Int         @map("user_id")
+  user         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt    DateTime    @map("created_at") @db.Timestamp(6) @default(now())
+
+  @@map("transaction")
+}
+
+enum Frequency {
+  Daily
+  Weekly
+  BiWeekly
+  Monthly
+  Annually
 }

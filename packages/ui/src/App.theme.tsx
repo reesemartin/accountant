@@ -2,6 +2,15 @@ import { createTheme } from '@mui/material'
 import { grey } from '@mui/material/colors'
 
 const AppTheme = createTheme({
+  components: {
+    MuiGrid2: {
+      styleOverrides: {
+        root: {
+          margin: 0,
+        },
+      },
+    },
+  },
   palette: {
     error: { contrastText: '#000', main: '#ec6458' },
     mode: 'dark',

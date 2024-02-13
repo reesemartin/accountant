@@ -121,19 +121,19 @@ export class ApiQueryService {
   }
 
   private async tokenCheck() {
-    const token = AuthService.getAccessToken()
-    if (!token) {
+    const refreshToken = AuthService.getRefreshToken()
+    if (!refreshToken) {
       // not logged in so nothing to refresh
       return
     }
 
-    if (!AuthService.checkToken(AuthService.getRefreshToken())) {
+    if (!AuthService.checkToken(refreshToken)) {
       // refresh token is expired so don't try refreshing
       // TODO: Trigger logout
       return
     }
 
-    if (!AuthService.checkToken(token)) {
+    if (!AuthService.checkToken(AuthService.getAccessToken())) {
       await this.refreshTokens()
     }
   }

@@ -2,6 +2,11 @@
 
 Accounting assistant tool monorepo. Optimized for free hosting on [Netlify](https://www.netlify.com/) and database on [PlanetScale](https://www.planetscale.com/).
 
+## Packages
+
+[Server](./packages/server/README.md)
+[UI](./packages/ui/README.md)
+
 ## Installation
 
 ![node](https://img.shields.io/badge/node-v20.10.0-brightgreen.svg?style=for-the-badge)
@@ -70,9 +75,11 @@ If deploying to netlify, a netlify.toml file has been included to handle the bui
 
 ## Todo
 
+- [ ] App freaks out with 404 if you duplicate tab in browser requiring a manual refresh of the page
 - [ ] Fix import paths
-- [ ] App header layout
 - [ ] Snackbar provider
+- [ ] Add ability to toggle enabled/disabled on transactions
+- [ ] Figure out why formik says it doesn't export FormikHelpers when it does
 - [ ] Auto refresh if api version is out of date
 - [ ] Auto generate hooks package from api endpoints for ui to use to replace the local hooks folder and http service classes
 - [ ] Registration form with ENV to toggle access for apps that don't need registration or temporary registration shutdown

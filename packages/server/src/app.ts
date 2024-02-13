@@ -1,4 +1,4 @@
-import { INestApplication } from '@nestjs/common'
+import { BadRequestException, INestApplication, ValidationPipe } from '@nestjs/common'
 import { NestFactory } from '@nestjs/core'
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify'
 
@@ -31,6 +31,15 @@ export async function bootstrap(init?: boolean): Promise<INestApplication> {
 
   app.enableCors()
 
+  app.useGlobalPipes(
+    new ValidationPipe({
+      exceptionFactory: (errors) => {
+        return new BadRequestException(errors[0]?.constraints?.[Object.keys(errors[0].constraints)[0]])
+      },
+      stopAtFirstError: true,
+      whitelist: true,
+    }),
+  )
   app.useGlobalFilters(new HttpExceptionFilter())
 
   app.flushLogs()
