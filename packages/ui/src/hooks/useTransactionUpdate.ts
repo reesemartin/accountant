@@ -22,8 +22,8 @@ export function useTransactionUpdate(): UseMutationResult<Transaction, Error, Tr
         endpoint: `api/v1/transaction/${payload.id}`,
       }),
     onSuccess: async (transaction) => {
-      await queryClient.invalidateQueries({ queryKey: ['api/v1/transaction'] })
-      await queryClient.invalidateQueries({ queryKey: [`api/v1/transaction/${transaction.id}`] })
+      queryClient.invalidateQueries({ queryKey: ['api/v1/transaction'] })
+      queryClient.invalidateQueries({ queryKey: [`api/v1/transaction/${transaction.id}`] })
       return transaction
     },
   })

@@ -21,7 +21,7 @@ export function useAuthLogout(): UseMutationResult<boolean, Error, void, () => v
     onSuccess: async () => {
       AuthService.setAccessToken(null)
       AuthService.setRefreshToken(null)
-      await queryClient.invalidateQueries({ queryKey: ['api/v1/auth/me'] })
+      queryClient.invalidateQueries({ queryKey: ['api/v1/auth/me'] })
       navigate('/login')
     },
   })

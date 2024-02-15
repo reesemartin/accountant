@@ -11,8 +11,8 @@ export function useTransactionDelete(): UseMutationResult<void, Error, { id: num
         endpoint: `api/v1/transaction/${payload.id}`,
       }),
     onSuccess: async (_, variables) => {
-      await queryClient.invalidateQueries({ queryKey: ['api/v1/transaction'] })
-      await queryClient.invalidateQueries({ queryKey: [`api/v1/transaction/${variables.id}`] })
+      queryClient.invalidateQueries({ queryKey: ['api/v1/transaction'] })
+      queryClient.invalidateQueries({ queryKey: [`api/v1/transaction/${variables.id}`] })
     },
   })
 }

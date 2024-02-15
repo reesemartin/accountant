@@ -21,7 +21,7 @@ export function useAuthLogin(): UseMutationResult<UserWithAuth, Error, LoginDTO,
     onSuccess: async (user) => {
       AuthService.setAccessToken(user.tokens.accessToken)
       AuthService.setRefreshToken(user.tokens.refreshToken)
-      await queryClient.invalidateQueries({ queryKey: ['api/v1/auth/me'] })
+      queryClient.invalidateQueries({ queryKey: ['api/v1/auth/me'] })
     },
   })
 }

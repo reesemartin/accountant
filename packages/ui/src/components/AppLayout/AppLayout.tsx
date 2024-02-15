@@ -9,11 +9,11 @@ import { AuthService } from './../../services'
 const noHeaderActionsRoutes = ['/login', '/logout']
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
-  height: `calc(100% - ${theme.spacing(8)})`,
   maxWidth: 1550,
+  minHeight: `calc(100% - ${theme.spacing(8)})`,
   width: `calc(100% - ${theme.spacing(8)})`,
   [theme.breakpoints.down('md')]: {
-    height: '100%',
+    minHeight: '100%',
     width: '100%',
   },
 }))
@@ -32,7 +32,7 @@ export const AppLayout: FC<AppLayoutProps> = (props) => {
   return (
     <Stack
       alignItems="center"
-      height="100vh"
+      minHeight="100vh"
       justifyContent={showHeader ? 'start' : 'center'}
       spacing={{ md: 4, xs: 0 }}
       width="100%"

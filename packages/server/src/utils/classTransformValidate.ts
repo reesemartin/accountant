@@ -7,7 +7,17 @@ export async function classTransformValidate<T extends object>(
   classType: new () => T,
   _event: Record<string, unknown>,
 ): Promise<T> {
-  const event = plainToInstance(classType, _event, {
+  // for some reason plainToInstance is not working with boolean values
+  // and the string 'true' or 'false' is always returned as true so we have to manually convert them
+  const booleanEvent = Object.entries(_event).reduce(
+    (acc, [key, value]) => ({
+      ...acc,
+      [key]: value === 'true' ? true : value === 'false' ? false : value,
+    }),
+    {} as Record<string, unknown>,
+  )
+  // now that we know that the boolean values are correct we can use plainToInstance
+  const event = plainToInstance(classType, booleanEvent, {
     enableImplicitConversion: true,
   })
   const errors = await validate(event, {

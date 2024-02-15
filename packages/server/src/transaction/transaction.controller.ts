@@ -12,6 +12,7 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common'
+import { Transaction } from '@prisma/client'
 
 import dayjs from 'dayjs'
 import { Request } from 'express'
@@ -79,5 +80,12 @@ export class TransactionController {
       id: Number(id),
       userId: req.user.id,
     })
+  }
+
+  formatTransaction(transaction: Transaction) {
+    return {
+      ...transaction,
+      amount: Number(transaction.amount),
+    }
   }
 }

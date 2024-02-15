@@ -26,7 +26,7 @@ import * as yup from 'yup'
 import { TransactionCreateDTO, useTransactionCreate } from '../../hooks'
 import { Frequency } from '../../models'
 
-type FormikTransactionCreateDTO = Omit<TransactionCreateDTO, 'startDate'> & { startDate: Dayjs }
+type FormikTransactionCreateDTO = Omit<TransactionCreateDTO, 'startDate'> & { startDate: Dayjs | null }
 
 const validationSchema = yup.object().shape({
   amount: yup.number().required(),
@@ -44,7 +44,7 @@ export const TransactionCreateForm: FC = () => {
       await transactionCreate.mutateAsync({
         ...values,
         frequency: values.recurring ? values.frequency : null,
-        startDate: values.startDate.toDate(),
+        startDate: (values.startDate || dayjs()).toDate(),
       })
       formikHelpers.resetForm()
     },
@@ -135,7 +135,7 @@ export const TransactionCreateForm: FC = () => {
                   label="Start Date"
                   value={formik.values.startDate}
                   onChange={(value: Dayjs | null) => {
-                    formik.setFieldValue('startDate', dayjs.isDayjs(value) ? value.toDate() : null, true)
+                    formik.setFieldValue('startDate', dayjs.isDayjs(value) ? value : null, true)
                   }}
                   slotProps={{
                     textField: {

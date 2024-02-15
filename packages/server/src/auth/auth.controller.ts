@@ -12,6 +12,7 @@ import {
   UseGuards,
 } from '@nestjs/common'
 import { User } from '@prisma/client'
+import { Decimal } from '@prisma/client/runtime/library'
 
 import { compareSync, genSaltSync, hashSync } from 'bcryptjs'
 import { Request } from 'express'
@@ -45,6 +46,7 @@ export class AuthController {
     const hashedPassword = hashSync(body.password, salt)
 
     const user = await this.userService.create({
+      balance: new Decimal(0),
       email: body.email,
       name: body.name || null,
       password: hashedPassword,
@@ -146,6 +148,7 @@ export class AuthController {
 
   formatUser(user: User) {
     return {
+      balance: Number(user.balance),
       createdAt: user.createdAt,
       email: user.email,
       id: user.id,

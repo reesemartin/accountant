@@ -75,11 +75,13 @@ If deploying to netlify, a netlify.toml file has been included to handle the bui
 
 ## Todo
 
+- [ ] Add Refresh Token Automatic Reuse Detection https://auth0.com/blog/refresh-tokens-what-are-they-and-when-to-use-them/
+- [ ] Switch token storage to memory instead of local storage with cookie fallback https://thenewstack.io/best-practices-for-storing-access-tokens-in-the-browser/
 - [ ] App freaks out with 404 if you duplicate tab in browser requiring a manual refresh of the page
 - [ ] Fix import paths
 - [ ] Snackbar provider
 - [ ] Add ability to toggle enabled/disabled on transactions
-- [ ] Figure out why formik says it doesn't export FormikHelpers when it does
+- [ ] Figure out why formik says it doesn't export FormikHelpers when it does and same with MUI and GridColDef
 - [ ] Auto refresh if api version is out of date
 - [ ] Auto generate hooks package from api endpoints for ui to use to replace the local hooks folder and http service classes
 - [ ] Registration form with ENV to toggle access for apps that don't need registration or temporary registration shutdown

@@ -31,19 +31,19 @@ export class TransactionService {
   }) {
     return this.prisma.transaction.findMany({
       orderBy: {
-        [params.orderBy || 'createdAt']: params.orderByDirection?.toLocaleLowerCase() || 'desc',
+        [params.orderBy || 'startDate']: params.orderByDirection?.toLocaleLowerCase() || 'desc',
       },
       skip: params.skip,
       take: params.take,
       where: {
-        createdAt:
+        recurring: params.recurring,
+        startDate:
           params.start || params.end
             ? {
                 gte: params.start,
                 lte: params.end,
               }
             : undefined,
-        recurring: params.recurring,
         userId: params.userId,
       },
     })

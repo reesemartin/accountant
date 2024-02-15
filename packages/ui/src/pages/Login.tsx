@@ -39,7 +39,16 @@ export const Login: FC = () => {
   }, [])
 
   return (
-    <Grid alignItems="center" container height="100%" justifyContent="center" spacing={4} width="100%">
+    <Grid
+      alignItems="center"
+      container
+      height="100%"
+      justifyContent="center"
+      spacing={4}
+      width="100%"
+      maxWidth="800px"
+      marginX="auto"
+    >
       <Grid xs={12} sm={8}>
         <Formik
           initialValues={{
