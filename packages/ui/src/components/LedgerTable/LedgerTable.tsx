@@ -1,10 +1,5 @@
 import { Button, CircularProgress, Stack, TextField } from '@mui/material'
-import {
-  DataGrid, //
-  // TODO: Remove the need for this once we figure out why GridColDef is not typed as being exported
-  // eslint-disable-next-line import/named
-  GridColDef,
-} from '@mui/x-data-grid'
+import { DataGrid, GridColDef } from '@mui/x-data-grid'
 
 import dayjs from 'dayjs'
 import Decimal from 'decimal.js'

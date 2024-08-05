@@ -11,14 +11,7 @@ import {
 import { DatePicker } from '@mui/x-date-pickers'
 
 import dayjs, { Dayjs } from 'dayjs'
-import {
-  Field,
-  Form,
-  Formik, //
-  // TODO: Remove the need for this once we figure out why FormikHelpers is not typed as being exported
-  // eslint-disable-next-line import/named
-  FormikHelpers,
-} from 'formik'
+import { Field, Form, Formik, FormikHelpers } from 'formik'
 import { Select, Switch } from 'formik-mui'
 import { FC, useCallback } from 'react'
 import * as yup from 'yup'

@@ -81,7 +81,6 @@ If deploying to netlify, a netlify.toml file has been included to handle the bui
 - [ ] Fix import paths
 - [ ] Snackbar provider
 - [ ] Add ability to toggle enabled/disabled on transactions
-- [ ] Figure out why formik says it doesn't export FormikHelpers when it does and same with MUI and GridColDef
 - [ ] Auto refresh if api version is out of date
 - [ ] Auto generate hooks package from api endpoints for ui to use to replace the local hooks folder and http service classes
 - [ ] Registration form with ENV to toggle access for apps that don't need registration or temporary registration shutdown

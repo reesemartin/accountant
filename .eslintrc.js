@@ -29,7 +29,6 @@ module.exports = {
       jsx: true,
       legacyDecorators: true,
     },
-    project: ['./tsconfig.json', './packages/*/tsconfig.json'],
     sourceType: 'module',
   },
   plugins: ['@typescript-eslint', 'jest', 'sort-keys'],
@@ -43,9 +42,7 @@ module.exports = {
   },
   settings: {
     'import/resolver': {
-      node: {
-        extensions: ['.js', '.jsx', '.ts', '.tsx'],
-      },
+      typescript: {}, // this loads <rootdir>/tsconfig.json to eslint https://github.com/import-js/eslint-plugin-import/issues/1485#issuecomment-535351922
     },
     react: {
       version: 'detect',
