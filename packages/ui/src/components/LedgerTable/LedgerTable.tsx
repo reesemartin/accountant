@@ -6,16 +6,15 @@ import Decimal from 'decimal.js'
 import { Field, Form, Formik } from 'formik'
 import { FC, useCallback, useMemo, useState } from 'react'
 
-import { useAuthMe, useTransactionDelete, useTransactionFindMany, useUserUpdate } from '../../hooks'
+import { useBankAccountFindMany, useBankAccountUpdate, useTransactionDelete, useTransactionFindMany } from '../../hooks'
 import { Frequency, Transaction } from './../../models'
 
 export const LedgerTable: FC = () => {
   const [years, setYears] = useState(2)
 
-  const authMe = useAuthMe()
-
+  const bankAccounts = useBankAccountFindMany()
   const transactionDelete = useTransactionDelete()
-  const userUpdate = useUserUpdate()
+  const bankAccountUpdate = useBankAccountUpdate()
 
   const oneTimeTransactions = useTransactionFindMany({
     recurring: false,
@@ -25,11 +24,13 @@ export const LedgerTable: FC = () => {
     recurring: true,
   })
 
+  const bankAccount = useMemo(() => bankAccounts.data[0] || { balance: 0 }, [bankAccounts.data])
+
   const onBalanceSubmit = useCallback(
     async (values: { balance: number }) => {
-      await userUpdate.mutateAsync({ balance: values.balance || 0, id: authMe.data.id })
+      await bankAccountUpdate.mutateAsync({ balance: values.balance || 0, id: bankAccount.id })
     },
-    [userUpdate, authMe],
+    [bankAccountUpdate, bankAccount],
   )
 
   const onDelete = useCallback(
@@ -40,7 +41,7 @@ export const LedgerTable: FC = () => {
   )
 
   const ledgerEntries = useMemo(() => {
-    let balance = new Decimal(authMe.data.balance)
+    let balance = new Decimal(bankAccount.balance)
     return [...(oneTimeTransactions.data || []), ...(recurringTransactions.data || [])]
       .flatMap((transaction) => {
         if (transaction.recurring && transaction.frequency) {
@@ -106,7 +107,7 @@ export const LedgerTable: FC = () => {
           balance: newBalance.toNumber(),
         }
       })
-  }, [authMe.data.balance, oneTimeTransactions.data, recurringTransactions.data, years])
+  }, [bankAccount.balance, oneTimeTransactions.data, recurringTransactions.data, years])
 
   const columns: GridColDef<Transaction & { balance: number }>[] = [
     {
@@ -152,14 +153,14 @@ export const LedgerTable: FC = () => {
 
         <Formik
           initialValues={{
-            balance: Number(authMe.data.balance),
+            balance: Number(bankAccount.balance),
           }}
           onSubmit={onBalanceSubmit}
         >
           <Form>
             <Stack direction={{ sm: 'row', xs: 'column' }} spacing={2} alignItems="center">
-              {userUpdate.isPending && <CircularProgress size={20} />}
-              {!userUpdate.isPending && (
+              {bankAccountUpdate.isPending && <CircularProgress size={20} />}
+              {!bankAccountUpdate.isPending && (
                 <>
                   <Field as={TextField} type="number" name="balance" label="Balance" />
                   <Button color="primary" variant="contained" type="submit">

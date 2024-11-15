@@ -1,4 +1,26 @@
 {
+  "name": "accountant",
+  "license": "MIT",
+  "main": "index.js",
+  "scripts": {
+    "build": "yarn lerna run build",
+    "depcheck": "yarn lerna run depcheck",
+    "dev:ui": "yarn lerna run dev --scope=@accountant/ui",
+    "dev:server": "yarn lerna run dev --scope=@accountant/server",
+    "format": "prettier --write .",
+    "lint": "eslint --fix .",
+    "postinstall": "husky install && yarn prisma:gen",
+    "prisma:gen": "yarn lerna run prisma:gen --scope=@accountant/server",
+    "prisma:pull": "yarn lerna run prisma:pull --scope=@accountant/server",
+    "prisma:push": "yarn lerna run prisma:push --scope=@accountant/server",
+    "test": "yarn lerna run test --scope=@accountant/ui && yarn lerna run test --scope=@accountant/server",
+    "typecheck": "tsc --noEmit"
+  },
+  "workspaces": {
+    "packages": [
+      "packages/*"
+    ]
+  },
   "devDependencies": {
     "@commitlint/cli": "^18.4.4",
     "@commitlint/config-conventional": "^18.4.4",
@@ -21,6 +43,7 @@
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-sort-keys": "^2.3.5",
     "husky": "^8.0.3",
+    "lerna": "^8.1.2",
     "lint-staged": "^15.2.0",
     "prettier": "^3.1.1",
     "prettier-plugin-organize-attributes": "^1.0.0",
@@ -32,7 +55,6 @@
       "react-app/jest"
     ]
   },
-  "license": "MIT",
   "lint-staged": {
     "*.css": [
       "prettier --log-level warn --write"
@@ -42,29 +64,5 @@
       "eslint --quiet --fix"
     ]
   },
-  "main": "index.js",
-  "name": "accountant",
-  "packageManager": "yarn@4.0.2",
-  "scripts": {
-    "build": "yarn lerna run build",
-    "depcheck": "yarn lerna run depcheck",
-    "dev:ui": "yarn lerna run dev --scope=@accountant/ui",
-    "dev:server": "yarn lerna run dev --scope=@accountant/server",
-    "format": "prettier --write .",
-    "lint": "eslint --fix .",
-    "postinstall": "husky install && yarn prisma:gen",
-    "prisma:gen": "yarn lerna run prisma:gen --scope=@accountant/server",
-    "prisma:pull": "yarn lerna run prisma:pull --scope=@accountant/server",
-    "prisma:push": "yarn lerna run prisma:push --scope=@accountant/server",
-    "test": "yarn lerna run test --scope=@accountant/ui && yarn lerna run test --scope=@accountant/server",
-    "typecheck": "tsc --noEmit"
-  },
-  "workspaces": {
-    "packages": [
-      "packages/*"
-    ]
-  },
-  "dependencies": {
-    "lerna": "^8.1.2"
-  }
+  "packageManager": "yarn@4.0.2"
 }

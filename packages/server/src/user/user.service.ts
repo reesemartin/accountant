@@ -8,7 +8,7 @@ export class UserService {
   constructor(private prisma: PrismaService) {}
 
   async findOne(params: Partial<User>) {
-    return await this.prisma.user.findFirst({
+    return await this.prisma.user.findUnique({
       where: {
         email: params.email,
         id: params.id,
@@ -32,5 +32,14 @@ export class UserService {
         id: params.id,
       },
     })
+  }
+
+  formatUser(user: User) {
+    return {
+      createdAt: user.createdAt,
+      email: user.email,
+      id: user.id,
+      name: user.name,
+    }
   }
 }

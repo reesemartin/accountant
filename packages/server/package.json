@@ -1,4 +1,23 @@
 {
+  "name": "@accountant/server",
+  "license": "MIT",
+  "version": "1.0.0",
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "types": "./dist/esm/index.d.ts",
+  "scripts": {
+    "build": "NODE_ENV=production nest build",
+    "depcheck": "depcheck .",
+    "dev": "nest start --watch | pino-pretty",
+    "dev:debug": "nest start --debug --watch | pino-pretty",
+    "prisma:gen": "yarn prisma generate --schema=./prisma/schema.prisma",
+    "prisma:pull": "yarn prisma db pull",
+    "prisma:push": "yarn prisma db push",
+    "start:prod": "NODE_ENV=production node dist/main",
+    "test": "TZ=UTC NODE_ENV=test jest",
+    "test:cov": "jest --coverage",
+    "typecheck": "tsc --noEmit --incremental false"
+  },
   "dependencies": {
     "@fastify/aws-lambda": "^3.5.0",
     "@fastify/static": "^6.12.0",
@@ -107,24 +126,5 @@
     "transformIgnorePatterns": [
       "/node_modules/(?!nanoid).+\\.(js|jsx|ts|tsx)$"
     ]
-  },
-  "main": "./dist/cjs/index.js",
-  "module": "./dist/esm/index.js",
-  "name": "@accountant/server",
-  "license": "MIT",
-  "scripts": {
-    "build": "NODE_ENV=production nest build",
-    "depcheck": "depcheck .",
-    "dev": "nest start --watch | pino-pretty",
-    "dev:debug": "nest start --debug --watch | pino-pretty",
-    "prisma:gen": "yarn prisma generate --schema=./prisma/schema.prisma",
-    "prisma:pull": "yarn prisma db pull",
-    "prisma:push": "yarn prisma db push",
-    "start:prod": "NODE_ENV=production node dist/main",
-    "test": "TZ=UTC NODE_ENV=test jest",
-    "test:cov": "jest --coverage",
-    "typecheck": "tsc --noEmit --incremental false"
-  },
-  "types": "./dist/esm/index.d.ts",
-  "version": "1.0.0"
+  }
 }

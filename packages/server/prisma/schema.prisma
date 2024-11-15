@@ -25,17 +25,28 @@ model LoginAttempt {
 
 model User {
   id            Int      @id @default(autoincrement())
-  balance       Decimal  @db.Decimal(10,2) @default(0)
   email         String   @unique @db.VarChar(255)
   loginAttempts LoginAttempt[]
   name          String?  @db.VarChar(255)
   password      String   @db.VarChar(255)
   refreshToken  String?  @map("refresh_token") @db.VarChar(255)
   transactions  Transaction[]
+  bankAccounts  BankAccount[]
   createdAt     DateTime @map("created_at") @db.Timestamp(6) @default(now())
 
   @@map("user")
   @@index([email])
+}
+
+model BankAccount {
+  id           Int         @id @default(autoincrement())
+  balance      Decimal     @db.Decimal(10,2) @default(0)
+  name         String      @db.VarChar(255)
+  userId       Int         @map("user_id")
+  user         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt    DateTime    @map("created_at") @db.Timestamp(6) @default(now())
+
+  @@map("bank_account")
 }
 
 model Transaction {

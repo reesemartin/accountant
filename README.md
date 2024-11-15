@@ -1,6 +1,6 @@
 # Accountant
 
-Accounting assistant tool monorepo. Optimized for free hosting on [Netlify](https://www.netlify.com/) and database on [PlanetScale](https://www.planetscale.com/).
+Accounting assistant tool monorepo. Optimized for free hosting on [Netlify](https://www.netlify.com/). You will need a relational database for storing your data as well.
 
 ## Packages
 
@@ -82,7 +82,8 @@ If deploying to netlify, a netlify.toml file has been included to handle the bui
 - [ ] Snackbar provider
 - [ ] Add ability to toggle enabled/disabled on transactions
 - [ ] Auto refresh if api version is out of date
-- [ ] Auto generate hooks package from api endpoints for ui to use to replace the local hooks folder and http service classes
+- [ ] Auto generate hooks package from api endpoints for ui to use to replace the local hooks folder and http service classes using the openapi spec via swagger https://docs.nestjs.com/openapi/introduction and convert openapi spec to react query sdk using Orval https://orval.dev/guides/react-query
 - [ ] Registration form with ENV to toggle access for apps that don't need registration or temporary registration shutdown
 - [ ] Automate sending users to the login route if there is an error during token refresh
-- [ ] Add tests
+- [ ] Add api unit tests
+- [ ] Add ui storybook tests

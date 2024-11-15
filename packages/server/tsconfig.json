@@ -3,7 +3,6 @@
     "baseUrl": "./src",
     "module": "commonjs",
     "outDir": "./dist",
-    "strictPropertyInitialization": false,
     "target": "ES2022"
   },
   "extends": "./../../tsconfig.json",

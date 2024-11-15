@@ -1,7 +1,8 @@
-import { IsDefined, IsEmail, IsOptional, IsString } from 'class-validator'
+import { IsDefined, IsEmail, IsNotEmpty, IsOptional, IsString } from 'class-validator'
 
 export class RegisterDTO {
   @IsDefined()
+  @IsNotEmpty()
   @IsEmail()
   email: string
 
@@ -10,16 +11,19 @@ export class RegisterDTO {
   name?: string
 
   @IsDefined()
+  @IsNotEmpty()
   @IsString()
   password: string
 }
 
 export class LoginDTO {
   @IsDefined()
+  @IsNotEmpty()
   @IsEmail()
   email: string
 
   @IsDefined()
+  @IsNotEmpty()
   @IsString()
   password: string
 }

@@ -1,4 +1,17 @@
 {
+  "name": "@accountant/ui",
+  "license": "MIT",
+  "version": "1.0.0",
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "types": "./src/index.tsx",
+  "scripts": {
+    "build": "NODE_ENV=production webpack --config ./webpack.config.js --mode production",
+    "depcheck": "depcheck .",
+    "dev": "webpack serve --hot --config ./webpack.config.js --mode development",
+    "test": "TZ=UTC NODE_ENV=test jest",
+    "typecheck": "tsc --noEmit --incremental false"
+  },
   "browserslist": {
     "production": [
       ">0.2%",
@@ -144,18 +157,5 @@
         }
       ]
     }
-  },
-  "license": "MIT",
-  "main": "./dist/cjs/index.js",
-  "module": "./dist/esm/index.js",
-  "name": "@accountant/ui",
-  "scripts": {
-    "build": "NODE_ENV=production webpack --config ./webpack.config.js --mode production",
-    "depcheck": "depcheck .",
-    "dev": "webpack serve --hot --config ./webpack.config.js --mode development",
-    "test": "TZ=UTC NODE_ENV=test jest",
-    "typecheck": "tsc --noEmit --incremental false"
-  },
-  "types": "./src/index.tsx",
-  "version": "1.0.0"
+  }
 }

@@ -1,5 +1,4 @@
 export type User = {
-  balance: number
   id: number
   name: string
   email: string

@@ -11,8 +11,6 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common'
-import { User } from '@prisma/client'
-import { Decimal } from '@prisma/client/runtime/library'
 
 import { compareSync, genSaltSync, hashSync } from 'bcryptjs'
 import { Request } from 'express'
@@ -46,7 +44,6 @@ export class AuthController {
     const hashedPassword = hashSync(body.password, salt)
 
     const user = await this.userService.create({
-      balance: new Decimal(0),
       email: body.email,
       name: body.name || null,
       password: hashedPassword,
@@ -60,7 +57,7 @@ export class AuthController {
     await this.userService.update({ id: user.id, refreshToken: hashSync(tokens.refreshToken, salt) })
 
     return {
-      ...this.formatUser(user),
+      ...this.userService.formatUser(user),
       tokens,
     }
   }
@@ -107,7 +104,7 @@ export class AuthController {
     }
 
     return {
-      ...this.formatUser(user),
+      ...this.userService.formatUser(user),
       tokens,
     }
   }
@@ -128,7 +125,7 @@ export class AuthController {
       throw new NotFoundException('User not found')
     }
 
-    return this.formatUser(user)
+    return this.userService.formatUser(user)
   }
 
   @Get('refresh')
@@ -144,15 +141,5 @@ export class AuthController {
     await this.userService.update({ id: user.id, refreshToken: hashSync(tokens.refreshToken, genSaltSync(10)) })
 
     return tokens
-  }
-
-  formatUser(user: User) {
-    return {
-      balance: Number(user.balance),
-      createdAt: user.createdAt,
-      email: user.email,
-      id: user.id,
-      name: user.name,
-    }
   }
 }

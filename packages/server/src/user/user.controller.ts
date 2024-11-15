@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Logger, Param, Patch, Req, UseGuards } from '@nestjs/common'
+import { Body, Controller, Logger, Patch, Req, UseGuards } from '@nestjs/common'
 
 import { Request } from 'express'
 
@@ -14,20 +14,12 @@ export class UserController {
     this.logger = new Logger(UserController.name)
   }
 
-  @Patch(':id')
+  @Patch('')
   @UseGuards(JwtAuthGuard)
-  async update(@Param('id') id: string, @Body() body: UserUpdateDTO, @Req() req: Request) {
-    if (!id) {
-      throw new BadRequestException('User ID is required')
-    }
-
-    if (req.user.id !== Number(id)) {
-      throw new BadRequestException('You can only update your own user')
-    }
-
+  async update(@Body() body: UserUpdateDTO, @Req() req: Request) {
     return this.userService.update({
       ...body,
-      id: Number(id),
+      id: req.user.id,
     })
   }
 }

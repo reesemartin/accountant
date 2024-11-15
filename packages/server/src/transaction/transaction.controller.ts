@@ -5,6 +5,7 @@ import {
   Delete,
   Get,
   Logger,
+  NotFoundException,
   Param,
   Patch,
   Post,
@@ -12,7 +13,6 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common'
-import { Transaction } from '@prisma/client'
 
 import dayjs from 'dayjs'
 import { Request } from 'express'
@@ -50,11 +50,15 @@ export class TransactionController {
 
   @Get(':id')
   @UseGuards(JwtAuthGuard)
-  async get(@Param('id') id: string) {
+  async get(@Param('id') id: string, @Req() req: Request) {
     if (!id) {
       throw new BadRequestException('Transaction ID is required')
     }
-    return this.transactionService.get({ id: Number(id) })
+    const transaction = await this.transactionService.get({ id: Number(id), userId: req.user.id })
+    if (!transaction) {
+      throw new NotFoundException('Transaction not found')
+    }
+    return transaction
   }
 
   @Get()
@@ -75,17 +79,16 @@ export class TransactionController {
     if (!id) {
       throw new BadRequestException('Transaction ID is required')
     }
+
+    const existingTransaction = await this.transactionService.get({ id: Number(id), userId: req.user.id })
+    if (!existingTransaction || existingTransaction.userId !== req.user.id) {
+      throw new NotFoundException('Transaction not found')
+    }
+
     return this.transactionService.update({
       data: body,
       id: Number(id),
       userId: req.user.id,
     })
-  }
-
-  formatTransaction(transaction: Transaction) {
-    return {
-      ...transaction,
-      amount: Number(transaction.amount),
-    }
   }
 }
