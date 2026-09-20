@@ -4,7 +4,7 @@ import { BankAccount } from '../models'
 import { ApiQueryService } from '../services'
 
 export type BankAccountUpdateDTO = {
-  id: number
+  id: string
   balance?: number
   name?: string
 }

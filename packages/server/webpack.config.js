@@ -23,9 +23,6 @@ module.exports = {
   experiments: {
     topLevelAwait: true,
   },
-  externals: {
-    '@prisma/client': '@prisma/client',
-  },
   module: {
     rules: [
       {

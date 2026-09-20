@@ -8,13 +8,12 @@ export enum Frequency {
 }
 
 export type Transaction = {
-  id: number
+  id: string
   amount: number
   description: string
   disabled: boolean
   frequency: Frequency | null
   recurring: boolean
   startDate: string
-  userId: number
   createdAt: string
 }

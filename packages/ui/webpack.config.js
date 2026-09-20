@@ -47,6 +47,14 @@ module.exports = (env, argv) => {
           use: ['html-loader'],
         },
         {
+          // formik-mui ships an ESM build with extensionless imports, which webpack 5
+          // rejects under strict ESM resolution; relax it just for that package.
+          resolve: {
+            fullySpecified: false,
+          },
+          test: /node_modules\/formik-mui\/.*\.js$/,
+        },
+        {
           exclude: /node_modules/,
           test: /\.[cjt]sx?$/,
           use: [

@@ -1,7 +1,7 @@
-import { BankAccount, Prisma } from '@prisma/client'
-
 import { Expose } from 'class-transformer'
-import { IsDefined, IsEnum, IsIn, IsInt, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator'
+import { IsDefined, IsIn, IsInt, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator'
+
+const ORDERABLE_FIELDS = ['name', 'balance', 'createdAt'] as const
 
 export class BankAccountFindManyDTO {
   @IsOptional()
@@ -10,10 +10,10 @@ export class BankAccountFindManyDTO {
 
   @Expose()
   @IsOptional()
-  @IsEnum(Prisma.BankAccountScalarFieldEnum, {
-    message: 'Must be a valid field from the BankAccount object',
+  @IsIn(ORDERABLE_FIELDS, {
+    message: `Must be a valid field: ${ORDERABLE_FIELDS.join(', ')}`,
   })
-  orderBy?: keyof BankAccount
+  orderBy?: (typeof ORDERABLE_FIELDS)[number]
 
   @Expose()
   @IsOptional()
@@ -45,7 +45,7 @@ export class BankAccountCreateDTO {
 export class BankAccountUpdateDTO {
   @IsOptional()
   @IsNumber()
-  amount?: number
+  balance?: number
 
   @IsOptional()
   @IsNotEmpty()

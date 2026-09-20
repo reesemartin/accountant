@@ -2,7 +2,7 @@ import { Body, Controller, Logger, Patch, Req, UseGuards } from '@nestjs/common'
 
 import { Request } from 'express'
 
-import { JwtAuthGuard } from '../auth/jwtAuth.guard'
+import { FirebaseAuthGuard } from '../firebase/firebaseAuth.guard'
 import { UserUpdateDTO } from './user.model'
 import { UserService } from './user.service'
 
@@ -15,11 +15,12 @@ export class UserController {
   }
 
   @Patch('')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(FirebaseAuthGuard)
   async update(@Body() body: UserUpdateDTO, @Req() req: Request) {
-    return this.userService.update({
+    const user = await this.userService.update({
       ...body,
-      id: req.user.id,
+      id: req.user!.id,
     })
+    return this.userService.formatUser(user)
   }
 }

@@ -2,10 +2,10 @@ import { useMutation, UseMutationResult, useQueryClient } from '@tanstack/react-
 
 import { ApiQueryService } from '../services'
 
-export function useTransactionDelete(): UseMutationResult<void, Error, { id: number }, () => void> {
+export function useTransactionDelete(): UseMutationResult<void, Error, { id: string }, () => void> {
   const queryClient = useQueryClient()
 
-  return useMutation<void, Error, { id: number }, () => void>({
+  return useMutation<void, Error, { id: string }, () => void>({
     mutationFn: async (payload) =>
       new ApiQueryService().delete<void>({
         endpoint: `api/v1/transaction/${payload.id}`,

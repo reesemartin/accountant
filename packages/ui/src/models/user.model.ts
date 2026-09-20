@@ -1,13 +1,6 @@
 export type User = {
-  id: number
-  name: string
+  id: string
+  name: string | null
   email: string
   createdAt: string
-}
-
-export type UserWithAuth = User & {
-  tokens: {
-    accessToken: string
-    refreshToken: string
-  }
 }

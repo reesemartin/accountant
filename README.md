@@ -1,6 +1,6 @@
 # Accountant
 
-Accounting assistant tool monorepo. Optimized for free hosting on [Netlify](https://www.netlify.com/). You will need a relational database for storing your data as well.
+Accounting assistant tool monorepo. Optimized for free hosting on [Netlify](https://www.netlify.com/). Authentication is Google Sign-In and data is stored per-user in [Firestore](https://firebase.google.com/docs/firestore) (both via [Firebase](https://firebase.google.com/), on its free Spark plan).
 
 ## Packages
 
@@ -23,23 +23,31 @@ If you haven't already installed `yarn` then `corepack enable`
 yarn
 ```
 
+### Firebase setup (one time, ~10 minutes)
+
+The app needs a Firebase project for Google Sign-In and Firestore. This has to be done through the Firebase console (it needs your Google account), but it's a handful of clicks:
+
+1. Go to the [Firebase console](https://console.firebase.google.com/) and create a new project (or reuse an existing Google Cloud project).
+2. **Authentication** → Sign-in method → enable the **Google** provider.
+3. **Firestore Database** → Create database → start in **production mode**, pick a region.
+4. Project settings → **Service accounts** → **Generate new private key**. This downloads a JSON file — its contents become the `FIREBASE_SERVICE_ACCOUNT` env var below. Keep it secret; never commit it.
+5. Project settings → **General** → under "Your apps", add a **Web app** and copy its config values (`apiKey`, `authDomain`, `projectId`, `appId`) — these are safe to expose to the browser and become the `REACT_APP_FIREBASE_*` env vars below.
+6. Optionally deploy `firestore.rules` from the repo root (`Firestore Database` → `Rules`, or via the Firebase CLI) — it scopes every document to the signed-in user's own uid as defense in depth. The server's Admin SDK access bypasses these rules either way.
+
 ### Environment variables
 
 Create a `.env.local` file in the root of the project. Replace `local` with the environment you intend to run `local` or `production`. Add the following variables as needed:
 
-| Name               | Package | Description                                                       | Default               |
-| ------------------ | ------- | ----------------------------------------------------------------- | --------------------- |
-| DATABASE_URL       | SERVER  | Url containing the user, host, port, and password of the database |                       |
-| JWT_SECRET         | SERVER  | Secret used to sign JWT tokens                                    |                       |
-| LOG_QUERIES        | SERVER  | Log all queries to the console                                    | false                 |
-| REACT_APP_API_URL  | UI      | Url for the running instance of the server package                | http://localhost:3001 |
-| REFRESH_JWT_SECRET | SERVER  | Secret used to sign refresh JWT tokens                            |                       |
+| Name                            | Package | Description                                                                                             | Default                |
+| -------------------------------- | ------- | --------------------------------------------------------------------------------------------------------- | ----------------------- |
+| FIREBASE_SERVICE_ACCOUNT         | SERVER  | The full JSON contents of the service account key from Firebase setup step 4, as a single-line string    |                         |
+| REACT_APP_API_URL                | UI      | Url for the running instance of the server package                                                       | http://localhost:3001  |
+| REACT_APP_FIREBASE_API_KEY       | UI      | Web app config value from Firebase setup step 5                                                          |                         |
+| REACT_APP_FIREBASE_APP_ID        | UI      | Web app config value from Firebase setup step 5                                                          |                         |
+| REACT_APP_FIREBASE_AUTH_DOMAIN   | UI      | Web app config value from Firebase setup step 5                                                          |                         |
+| REACT_APP_FIREBASE_PROJECT_ID    | UI      | Web app config value from Firebase setup step 5                                                          |                         |
 
 ## Running the app
-
-```bash
-yarn prisma:gen
-```
 
 In separate terminals run:
 
@@ -71,12 +79,10 @@ Here is a decent rundown of possible types: [conventional-commit-types
 
 ### Netlify
 
-If deploying to netlify, a netlify.toml file has been included to handle the build and deployment process. Connect your repository to Netlify for automated deployment. The only thing you need to do is add the environmental variables listed above to your netlify site.
+If deploying to netlify, a netlify.toml file has been included to handle the build and deployment process. Connect your repository to Netlify for automated deployment. Add the environmental variables listed above to your Netlify site (Site configuration → Environment variables) — paste `FIREBASE_SERVICE_ACCOUNT`'s JSON in as-is, Netlify handles multi-line values fine.
 
 ## Todo
 
-- [ ] Add Refresh Token Automatic Reuse Detection https://auth0.com/blog/refresh-tokens-what-are-they-and-when-to-use-them/
-- [ ] Switch token storage to memory instead of local storage with cookie fallback https://thenewstack.io/best-practices-for-storing-access-tokens-in-the-browser/
 - [ ] App freaks out with 404 if you duplicate tab in browser requiring a manual refresh of the page
 - [ ] Fix import paths
 - [ ] Snackbar provider

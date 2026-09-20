@@ -4,7 +4,7 @@ import { Frequency, Transaction } from '../models'
 import { ApiQueryService } from '../services'
 
 export type TransactionUpdateDTO = {
-  id: number
+  id: string
   amount?: number
   description?: string
   frequency?: Frequency | null
