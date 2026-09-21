@@ -10,7 +10,24 @@ export const FIREBASE_AUTH = Symbol('FIREBASE_AUTH')
 export const FIRESTORE = Symbol('FIRESTORE')
 
 function getFirebaseApp(): App {
-  return getApps()[0] ?? initializeApp({ credential: cert(JSON.parse(env.FIREBASE_SERVICE_ACCOUNT)) })
+  if (getApps()[0]) {
+    return getApps()[0]
+  }
+
+  // The Admin SDK auto-detects FIRESTORE_EMULATOR_HOST / FIREBASE_AUTH_EMULATOR_HOST (set by
+  // `yarn dev:emulators`) and routes there instead of production, so local dev needs no real
+  // credentials at all.
+  if (process.env.FIRESTORE_EMULATOR_HOST) {
+    return initializeApp({ projectId: env.FIREBASE_PROJECT_ID || 'demo-accountant' })
+  }
+
+  if (!env.FIREBASE_SERVICE_ACCOUNT) {
+    throw new Error(
+      'FIREBASE_SERVICE_ACCOUNT is required outside of local emulator development. Set FIRESTORE_EMULATOR_HOST to use the emulators instead.',
+    )
+  }
+
+  return initializeApp({ credential: cert(JSON.parse(env.FIREBASE_SERVICE_ACCOUNT)) })
 }
 
 @Global()

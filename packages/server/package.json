@@ -8,11 +8,12 @@
   "scripts": {
     "build": "NODE_ENV=production nest build",
     "depcheck": "depcheck .",
-    "dev": "nest start --watch | pino-pretty",
-    "dev:debug": "nest start --debug --watch | pino-pretty",
+    "dev": "FIRESTORE_EMULATOR_HOST=127.0.0.1:8080 FIREBASE_AUTH_EMULATOR_HOST=127.0.0.1:9099 nest start --watch | pino-pretty",
+    "dev:debug": "FIRESTORE_EMULATOR_HOST=127.0.0.1:8080 FIREBASE_AUTH_EMULATOR_HOST=127.0.0.1:9099 nest start --debug --watch | pino-pretty",
     "start:prod": "NODE_ENV=production node dist/main",
     "test": "TZ=UTC NODE_ENV=test jest",
     "test:cov": "jest --coverage",
+    "test:integration": "TZ=UTC NODE_ENV=test jest --testPathIgnorePatterns='/node_modules/' --testMatch='**/*.integration.test.ts'",
     "typecheck": "tsc --noEmit --incremental false"
   },
   "dependencies": {
@@ -86,6 +87,10 @@
     "testMatch": [
       "**/__tests__/**/*.+(ts|tsx|js)",
       "**/?(*.)+(spec|test).+(ts|tsx|js)"
+    ],
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "\\.integration\\.test\\.ts$"
     ],
     "transform": {
       "^.+\\.(js|jsx|ts|tsx)$": [

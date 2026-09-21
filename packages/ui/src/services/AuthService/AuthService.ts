@@ -1,5 +1,14 @@
 import { FirebaseApp, initializeApp } from 'firebase/app'
-import { Auth, getAuth, GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut, User } from 'firebase/auth'
+import {
+  Auth,
+  connectAuthEmulator,
+  getAuth,
+  GoogleAuthProvider,
+  onAuthStateChanged,
+  signInWithPopup,
+  signOut,
+  User,
+} from 'firebase/auth'
 
 const firebaseApp: FirebaseApp = initializeApp({
   apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
@@ -9,6 +18,13 @@ const firebaseApp: FirebaseApp = initializeApp({
 })
 
 const firebaseAuth: Auth = getAuth(firebaseApp)
+
+if (process.env.REACT_APP_USE_FIREBASE_EMULATOR === 'true') {
+  // The emulator swaps the real Google OAuth popup for a local fake sign-in screen, so
+  // signInWithGoogle() below works fully offline against `yarn dev:emulators`.
+  connectAuthEmulator(firebaseAuth, 'http://127.0.0.1:9099', { disableWarnings: true })
+}
+
 const googleProvider = new GoogleAuthProvider()
 
 export class AuthService {

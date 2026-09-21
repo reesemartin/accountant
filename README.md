@@ -23,33 +23,28 @@ If you haven't already installed `yarn` then `corepack enable`
 yarn
 ```
 
-### Firebase setup (one time, ~10 minutes)
+### Local development — no Firebase project needed
 
-The app needs a Firebase project for Google Sign-In and Firestore. This has to be done through the Firebase console (it needs your Google account), but it's a handful of clicks:
+Local dev runs entirely against the **Firebase Local Emulator Suite**: real local implementations of Auth and Firestore, offline, free, with no external account required. `yarn dev:server` and `yarn dev:ui` are already wired to point at them, so you don't need a real Firebase project just to develop — only for an actual deploy (see the next section).
 
-1. Go to the [Firebase console](https://console.firebase.google.com/) and create a new project (or reuse an existing Google Cloud project).
-2. **Authentication** → Sign-in method → enable the **Google** provider.
-3. **Firestore Database** → Create database → start in **production mode**, pick a region.
-4. Project settings → **Service accounts** → **Generate new private key**. This downloads a JSON file — its contents become the `FIREBASE_SERVICE_ACCOUNT` env var below. Keep it secret; never commit it.
-5. Project settings → **General** → under "Your apps", add a **Web app** and copy its config values (`apiKey`, `authDomain`, `projectId`, `appId`) — these are safe to expose to the browser and become the `REACT_APP_FIREBASE_*` env vars below.
-6. Optionally deploy `firestore.rules` from the repo root (`Firestore Database` → `Rules`, or via the Firebase CLI) — it scopes every document to the signed-in user's own uid as defense in depth. The server's Admin SDK access bypasses these rules either way.
+Create a `.env.local` in the repo root with just this:
 
-### Environment variables
+```bash
+REACT_APP_API_URL=http://localhost:3001
+REACT_APP_FIREBASE_API_KEY=demo-api-key
+REACT_APP_FIREBASE_APP_ID=demo-app-id
+REACT_APP_FIREBASE_AUTH_DOMAIN=demo-accountant.firebaseapp.com
+REACT_APP_FIREBASE_PROJECT_ID=demo-accountant
+REACT_APP_USE_FIREBASE_EMULATOR=true
+```
 
-Create a `.env.local` file in the root of the project. Replace `local` with the environment you intend to run `local` or `production`. Add the following variables as needed:
+None of these values need to be real — `demo-`-prefixed project IDs are a Firebase convention that tells both the client SDK and the emulators "don't talk to production, ever." Leave `FIREBASE_SERVICE_ACCOUNT` out of this file entirely; the server only needs it when `FIRESTORE_EMULATOR_HOST` isn't set (i.e. in production), and keeping a real service account key out of your local dev bundle is one less thing that can leak.
 
-| Name                            | Package | Description                                                                                             | Default                |
-| -------------------------------- | ------- | --------------------------------------------------------------------------------------------------------- | ----------------------- |
-| FIREBASE_SERVICE_ACCOUNT         | SERVER  | The full JSON contents of the service account key from Firebase setup step 4, as a single-line string    |                         |
-| REACT_APP_API_URL                | UI      | Url for the running instance of the server package                                                       | http://localhost:3001  |
-| REACT_APP_FIREBASE_API_KEY       | UI      | Web app config value from Firebase setup step 5                                                          |                         |
-| REACT_APP_FIREBASE_APP_ID        | UI      | Web app config value from Firebase setup step 5                                                          |                         |
-| REACT_APP_FIREBASE_AUTH_DOMAIN   | UI      | Web app config value from Firebase setup step 5                                                          |                         |
-| REACT_APP_FIREBASE_PROJECT_ID    | UI      | Web app config value from Firebase setup step 5                                                          |                         |
+In three separate terminals:
 
-## Running the app
-
-In separate terminals run:
+```bash
+yarn dev:emulators
+```
 
 ```bash
 yarn dev:server
@@ -59,7 +54,42 @@ yarn dev:server
 yarn dev:ui
 ```
 
-Your app is now running on [http://localhost:3000](http://localhost:3000) with server api accessible at [http://localhost:3001](http://localhost:3001).
+Your app is now running on [http://localhost:3000](http://localhost:3000), the server api at [http://localhost:3001](http://localhost:3001), and the emulator UI (browse/edit Firestore data, see signed-in users) at [http://localhost:4000](http://localhost:4000). Clicking "Sign in with Google" opens the emulator's fake sign-in screen instead of a real Google prompt — pick any email, no real Google account involved. Emulator data is in-memory and resets each time you stop `yarn dev:emulators`; if you want it to persist across restarts, run `firebase emulators:start --export-on-exit=./firebase-emulator-data --import=./firebase-emulator-data` instead (create that folder once first).
+
+### Firebase project setup (for an actual deploy, ~10 minutes)
+
+Only needed once you're ready to deploy somewhere real (e.g. Netlify) — local dev doesn't need this. Has to be done through the Firebase console (it needs your Google account):
+
+1. Go to the [Firebase console](https://console.firebase.google.com/) and create a new project (or reuse an existing Google Cloud project).
+2. **Authentication** → Sign-in method → enable the **Google** provider.
+3. **Firestore Database** → Create database → start in **production mode**, pick a region.
+4. Project settings → **Service accounts** → **Generate new private key**. This downloads a JSON file — its contents become the `FIREBASE_SERVICE_ACCOUNT` env var below. Keep it secret; never commit it, and never put it in your local `.env.local`.
+5. Project settings → **General** → under "Your apps", add a **Web app** and copy its config values (`apiKey`, `authDomain`, `projectId`, `appId`) — these are safe to expose to the browser and become the `REACT_APP_FIREBASE_*` env vars below.
+6. Deploy `firestore.rules` and `firestore.indexes.json` from the repo root: `npx firebase deploy --only firestore:rules,firestore:indexes --project <your-project-id>`. The rules scope every document to the signed-in user's own uid as defense in depth (the server's Admin SDK access bypasses them either way); the indexes are required in production for the transaction list queries to work at all (the emulator doesn't enforce them, which is why this only bites you in production if skipped).
+
+### Environment variables
+
+| Name                            | Package | Description                                                                                             | Default                | Needed for local dev? |
+| -------------------------------- | ------- | --------------------------------------------------------------------------------------------------------- | ----------------------- | ----------------------- |
+| FIREBASE_SERVICE_ACCOUNT         | SERVER  | The full JSON contents of the service account key from Firebase setup step 4, as a single-line string    |                         | No — omit it            |
+| FIREBASE_PROJECT_ID              | SERVER  | Firebase project ID; also used as the emulator project ID in local dev                                   | demo-accountant         | No — defaults fine      |
+| REACT_APP_API_URL                | UI      | Url for the running instance of the server package                                                       | http://localhost:3001  | Yes                      |
+| REACT_APP_FIREBASE_API_KEY       | UI      | Web app config value from Firebase setup step 5                                                          |                         | Yes (any placeholder)   |
+| REACT_APP_FIREBASE_APP_ID        | UI      | Web app config value from Firebase setup step 5                                                          |                         | Yes (any placeholder)   |
+| REACT_APP_FIREBASE_AUTH_DOMAIN   | UI      | Web app config value from Firebase setup step 5                                                          |                         | Yes (any placeholder)   |
+| REACT_APP_FIREBASE_PROJECT_ID    | UI      | Web app config value from Firebase setup step 5                                                          |                         | Yes (must match FIREBASE_PROJECT_ID) |
+| REACT_APP_USE_FIREBASE_EMULATOR  | UI      | Connects the client to the local Auth emulator instead of real Firebase                                   | (unset)                 | Yes — set to `true`     |
+
+## Testing
+
+```bash
+yarn test              # fast unit tests, no external dependencies
+yarn test:integration  # server tests that exercise a real Firestore/Auth emulator
+```
+
+`test:integration` wraps the server's tests in `firebase emulators:exec`, which starts the emulators, runs the tests, then tears them down — you don't need `yarn dev:emulators` running separately for this one. These specifically cover behavior that's only real when checked against actual Firestore (Firestore-specific query constraints, `undefined`-field handling), not something a hand-rolled mock would meaningfully verify. They live in `*.integration.test.ts` files next to the service they test, and are excluded from the plain `yarn test` run. Both run in CI on every PR (`.github/workflows/ci.yml`).
+
+Note: the Firestore emulator is more lenient than production about a couple of query-shape constraints (notably: production requires a range-filtered query's first `orderBy` to be on that same field). The integration tests can't catch a regression there — see the comment in `transaction.integration.test.ts`.
 
 ## Contributing
 

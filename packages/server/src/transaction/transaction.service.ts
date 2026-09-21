@@ -3,7 +3,7 @@ import { Inject, Injectable } from '@nestjs/common'
 import { CollectionReference, Firestore, Timestamp } from 'firebase-admin/firestore'
 
 import { FIRESTORE } from './../firebase/firebase.module'
-import { applyListQuery } from './../utils'
+import { applyListQuery, stripUndefined } from './../utils'
 import { Frequency } from './transaction.model'
 
 type TransactionRecord = {
@@ -65,8 +65,11 @@ export class TransactionService {
     take?: number
     userId: string
   }): Promise<Transaction[]> {
+    // Firestore requires the first orderBy to be on the same field as any range filter,
+    // so a startDate range forces ordering by startDate regardless of the requested field.
+    const orderBy = params.start || params.end ? 'startDate' : params.orderBy
     const query = applyListQuery(this.collection(params.userId), {
-      orderBy: params.orderBy,
+      orderBy,
       orderByDirection: params.orderByDirection,
       skip: params.skip,
       take: params.take,
@@ -87,8 +90,15 @@ export class TransactionService {
 
   async update(params: { id: string; userId: string; data: Partial<Omit<TransactionRecord, 'createdAt'>> }) {
     const ref = this.collection(params.userId).doc(params.id)
-    await ref.update({ ...params.data })
+    await ref.update(stripUndefined(params.data))
     const updated = await ref.get()
     return { id: updated.id, ...(updated.data() as TransactionRecord) }
+  }
+
+  formatTransaction(transaction: Transaction) {
+    return {
+      ...transaction,
+      createdAt: transaction.createdAt.toDate().toISOString(),
+    }
   }
 }

@@ -3,7 +3,7 @@ import { Inject, Injectable } from '@nestjs/common'
 import { CollectionReference, Firestore, Timestamp } from 'firebase-admin/firestore'
 
 import { FIRESTORE } from './../firebase/firebase.module'
-import { applyListQuery } from './../utils'
+import { applyListQuery, stripUndefined } from './../utils'
 
 type BankAccountRecord = {
   balance: number
@@ -64,7 +64,7 @@ export class BankAccountService {
 
   async update(params: { id: string; userId: string; data: Partial<Pick<BankAccountRecord, 'balance' | 'name'>> }) {
     const ref = this.collection(params.userId).doc(params.id)
-    await ref.update({ ...params.data })
+    await ref.update(stripUndefined(params.data))
     const updated = await ref.get()
     return { id: updated.id, ...(updated.data() as BankAccountRecord) }
   }

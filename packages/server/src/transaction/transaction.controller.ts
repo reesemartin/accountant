@@ -33,10 +33,11 @@ export class TransactionController {
   @Post()
   @UseGuards(FirebaseAuthGuard)
   async create(@Body() body: TransactionCreateDTO, @Req() req: Request) {
-    return this.transactionService.create({
+    const transaction = await this.transactionService.create({
       ...body,
       userId: req.user!.id,
     })
+    return this.transactionService.formatTransaction(transaction)
   }
 
   @Delete(':id')
@@ -58,19 +59,20 @@ export class TransactionController {
     if (!transaction) {
       throw new NotFoundException('Transaction not found')
     }
-    return transaction
+    return this.transactionService.formatTransaction(transaction)
   }
 
   @Get()
   @UseGuards(FirebaseAuthGuard)
   async findMany(@Query() query: Record<string, string>, @Req() req: Request) {
     const validatedQuery = await classTransformValidate<TransactionFindManyDTO>(TransactionFindManyDTO, query)
-    return this.transactionService.findMany({
+    const transactions = await this.transactionService.findMany({
       ...validatedQuery,
       end: validatedQuery.end ? dayjs(validatedQuery.end).toDate() : undefined,
       start: validatedQuery.start ? dayjs(validatedQuery.start).toDate() : undefined,
       userId: req.user!.id,
     })
+    return transactions.map((transaction) => this.transactionService.formatTransaction(transaction))
   }
 
   @Patch(':id')
@@ -85,10 +87,11 @@ export class TransactionController {
       throw new NotFoundException('Transaction not found')
     }
 
-    return this.transactionService.update({
+    const transaction = await this.transactionService.update({
       data: body,
       id,
       userId: req.user!.id,
     })
+    return this.transactionService.formatTransaction(transaction)
   }
 }
