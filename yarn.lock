@@ -19928,13 +19928,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"universal-analytics@npm:^0.5.3":
-  version: 0.5.4
-  resolution: "universal-analytics@npm:0.5.4"
+"universal-analytics@npm:0.5.3":
+  version: 0.5.3
+  resolution: "universal-analytics@npm:0.5.3"
   dependencies:
     debug: "npm:^4.3.1"
-    uuid: "npm:^14.0.0"
-  checksum: 3e4aed50e38a70b7ddf29ce3e16233c84e4b72d7aa2b79db3cce6dacc0459075f291a0d76ce3f5f65b7d72f2236700246dd1361e1c02b62955ca07057f442269
+    uuid: "npm:^8.0.0"
+  checksum: 649ec323c4c4da9663de27b06833f0efbcde27b09262f116b102a15b2812f0c18045aa5416595e8eca609c661ffd0ace5251e323c877f85eec4ff9e330b6c73e
   languageName: node
   linkType: hard
 
@@ -20095,16 +20095,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"uuid@npm:^14.0.0":
-  version: 14.0.2
-  resolution: "uuid@npm:14.0.2"
-  bin:
-    uuid: dist-node/bin/uuid
-  checksum: 88906237004db370b013129c8372a2149f6fa1aad7a5f78fa65ddf2ba0a8663097022300d81fa01f551efee9d6bbe8c7ab140dc6d49f1b03d289f855096990c9
-  languageName: node
-  linkType: hard
-
-"uuid@npm:^8.3.2":
+"uuid@npm:^8.0.0, uuid@npm:^8.3.2":
   version: 8.3.2
   resolution: "uuid@npm:8.3.2"
   bin:

@@ -64,5 +64,8 @@
       "eslint --quiet --fix"
     ]
   },
-  "packageManager": "yarn@4.0.2"
+  "packageManager": "yarn@4.0.2",
+  "resolutions": {
+    "universal-analytics": "0.5.3"
+  }
 }
