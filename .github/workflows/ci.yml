@@ -25,11 +25,7 @@ jobs:
         run: corepack enable
 
       - name: Install dependencies
-        # TODO: switch to `yarn install --immutable` once yarn.lock has been regenerated with a
-        # real internet connection and committed (see README) — it's currently out of sync with
-        # package.json because it was last regenerated somewhere that couldn't reach Yarn's
-        # registry to update it.
-        run: yarn install
+        run: yarn install --immutable
 
       - name: Typecheck
         run: yarn typecheck
