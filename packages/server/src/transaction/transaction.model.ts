@@ -1,5 +1,3 @@
-import { $Enums, Prisma, Transaction } from '@prisma/client'
-
 import { Expose } from 'class-transformer'
 import {
   IsBoolean,
@@ -14,6 +12,17 @@ import {
   IsString,
 } from 'class-validator'
 
+export enum Frequency {
+  Daily = 'Daily',
+  Weekly = 'Weekly',
+  BiWeekly = 'BiWeekly',
+  Monthly = 'Monthly',
+  BiMonthly = 'BiMonthly',
+  Annually = 'Annually',
+}
+
+const ORDERABLE_FIELDS = ['description', 'amount', 'startDate', 'createdAt'] as const
+
 export class TransactionFindManyDTO {
   @Expose()
   @IsOptional()
@@ -27,10 +36,10 @@ export class TransactionFindManyDTO {
 
   @Expose()
   @IsOptional()
-  @IsEnum(Prisma.TransactionScalarFieldEnum, {
-    message: 'Must be a valid field from the Transaction object',
+  @IsIn(ORDERABLE_FIELDS, {
+    message: `Must be a valid field: ${ORDERABLE_FIELDS.join(', ')}`,
   })
-  orderBy?: keyof Transaction
+  orderBy?: (typeof ORDERABLE_FIELDS)[number]
 
   @Expose()
   @IsOptional()
@@ -72,10 +81,10 @@ export class TransactionCreateDTO {
   disabled?: boolean
 
   @IsOptional()
-  @IsEnum($Enums.Frequency, {
-    message: `Must be a valid frequency: ${Object.values($Enums.Frequency).join(', ')}`,
+  @IsEnum(Frequency, {
+    message: `Must be a valid frequency: ${Object.values(Frequency).join(', ')}`,
   })
-  frequency?: $Enums.Frequency
+  frequency?: Frequency
 
   @IsOptional()
   @IsBoolean()
@@ -100,10 +109,10 @@ export class TransactionUpdateDTO {
   disabled?: boolean
 
   @IsOptional()
-  @IsEnum($Enums.Frequency, {
-    message: `Must be a valid frequency: ${Object.values($Enums.Frequency).join(', ')}`,
+  @IsEnum(Frequency, {
+    message: `Must be a valid frequency: ${Object.values(Frequency).join(', ')}`,
   })
-  frequency?: $Enums.Frequency
+  frequency?: Frequency
 
   @IsOptional()
   @IsBoolean()

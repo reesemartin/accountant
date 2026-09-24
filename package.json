@@ -5,15 +5,14 @@
   "scripts": {
     "build": "yarn lerna run build",
     "depcheck": "yarn lerna run depcheck",
+    "dev:emulators": "firebase emulators:start",
     "dev:ui": "yarn lerna run dev --scope=@accountant/ui",
     "dev:server": "yarn lerna run dev --scope=@accountant/server",
     "format": "prettier --write .",
     "lint": "eslint --fix .",
-    "postinstall": "husky install && yarn prisma:gen",
-    "prisma:gen": "yarn lerna run prisma:gen --scope=@accountant/server",
-    "prisma:pull": "yarn lerna run prisma:pull --scope=@accountant/server",
-    "prisma:push": "yarn lerna run prisma:push --scope=@accountant/server",
+    "postinstall": "husky install",
     "test": "yarn lerna run test --scope=@accountant/ui && yarn lerna run test --scope=@accountant/server",
+    "test:integration": "firebase emulators:exec --only auth,firestore \"yarn lerna run test:integration --scope=@accountant/server\"",
     "typecheck": "tsc --noEmit"
   },
   "workspaces": {
@@ -42,6 +41,7 @@
     "eslint-plugin-react": "^7.33.2",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-sort-keys": "^2.3.5",
+    "firebase-tools": "^13.0.0",
     "husky": "^8.0.3",
     "lerna": "^8.1.2",
     "lint-staged": "^15.2.0",
@@ -64,5 +64,8 @@
       "eslint --quiet --fix"
     ]
   },
-  "packageManager": "yarn@4.0.2"
+  "packageManager": "yarn@4.0.2",
+  "resolutions": {
+    "universal-analytics": "0.5.3"
+  }
 }

@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      # The Firestore emulator runs on the JVM.
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Enable corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Typecheck
+        run: yarn typecheck
+
+      - name: Unit tests
+        run: yarn test
+
+      - name: Integration tests (Firebase emulators)
+        run: yarn test:integration
+
+      - name: Build
+        # NETLIFY=true matches how Netlify's own build behaves: env vars come from the platform
+        # directly instead of a committed .env.production file, so no secrets are needed here to
+        # prove the build compiles.
+        run: yarn build
+        env:
+          NETLIFY: 'true'

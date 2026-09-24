@@ -39,3 +39,7 @@ node_modules/
 
 # misc
 .DS_Store
+
+# Firebase Local Emulator Suite
+.firebase/
+firebase-emulator-data/

@@ -1,17 +1,9 @@
-import { Button, CircularProgress, Unstable_Grid2 as Grid, Stack, styled, TextField } from '@mui/material'
+import { Button, CircularProgress, Stack, styled, Typography } from '@mui/material'
 
-import { Field, Form, Formik } from 'formik'
 import { FC, useCallback, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import * as yup from 'yup'
 
-import { LoginDTO, useAuthLogin } from '../hooks'
-import { AuthService } from '../services'
-
-const validationSchema = yup.object().shape({
-  email: yup.string().email('Enter a valid email').required('Email is required'),
-  password: yup.string().required('Password is required'),
-})
+import { useAuthLogin, useFirebaseAuthState } from '../hooks'
 
 const StyledLogoBox = styled('img')({
   maxWidth: '100%',
@@ -21,80 +13,40 @@ const StyledLogoBox = styled('img')({
 export const Login: FC = () => {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
+  const { initializing, user } = useFirebaseAuthState()
   const login = useAuthLogin()
 
-  const onSubmit = useCallback(
-    async (values: LoginDTO) => {
-      await login.mutateAsync(values)
-
-      navigate(searchParams.get('redirect') || '/')
-    },
-    [searchParams],
-  )
+  const onSignIn = useCallback(async () => {
+    await login.mutateAsync()
+    navigate(searchParams.get('redirect') || '/')
+  }, [searchParams])
 
   useEffect(() => {
-    if (AuthService.getAccessToken()) {
+    if (!initializing && user) {
       navigate(searchParams.get('redirect') || '/')
     }
-  }, [])
+  }, [initializing, user])
 
   return (
-    <Grid
+    <Stack
       alignItems="center"
-      container
       height="100%"
       justifyContent="center"
       spacing={4}
       width="100%"
-      maxWidth="800px"
+      maxWidth="400px"
       marginX="auto"
     >
-      <Grid xs={12} sm={8}>
-        <Formik
-          initialValues={{
-            email: '',
-            password: '',
-          }}
-          onSubmit={onSubmit}
-          validateOnBlur
-          validateOnChange
-          validateOnMount
-          validationSchema={validationSchema}
-        >
-          {(formik) => (
-            <Form>
-              <Stack spacing={2} alignItems="center">
-                {(login.isPending || login.isSuccess) && <CircularProgress size={80} />}
-                {!login.isPending && !login.isSuccess && (
-                  <>
-                    <StyledLogoBox alt="Accountant" src="/favicon.png" />
-                    <Field
-                      as={TextField}
-                      fullWidth
-                      name="email"
-                      label="Email"
-                      error={formik.touched.email && Boolean(formik.errors.email)}
-                      helperText={(formik.touched.email && formik.errors.email) || ' '}
-                    />
-                    <Field
-                      as={TextField}
-                      fullWidth
-                      name="password"
-                      label="Password"
-                      type="password"
-                      error={formik.touched.password && Boolean(formik.errors.password)}
-                      helperText={(formik.touched.password && formik.errors.password) || ' '}
-                    />
-                    <Button color="primary" variant="contained" fullWidth type="submit">
-                      Login
-                    </Button>
-                  </>
-                )}
-              </Stack>
-            </Form>
-          )}
-        </Formik>
-      </Grid>
-    </Grid>
+      {(initializing || login.isPending) && <CircularProgress size={80} />}
+      {!initializing && !login.isPending && (
+        <>
+          <StyledLogoBox alt="Accountant" src="/favicon.png" />
+          <Button color="primary" variant="contained" fullWidth onClick={onSignIn}>
+            Sign in with Google
+          </Button>
+          {login.isError && <Typography color="error">Sorry, sign in failed. Please try again.</Typography>}
+        </>
+      )}
+    </Stack>
   )
 }

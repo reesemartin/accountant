@@ -1,42 +1,56 @@
-import { Injectable } from '@nestjs/common'
-import { User } from '@prisma/client'
+import { Inject, Injectable } from '@nestjs/common'
 
-import { PrismaService } from 'nestjs-prisma'
+import { CollectionReference, Firestore, Timestamp } from 'firebase-admin/firestore'
+
+import { FIRESTORE } from './../firebase/firebase.module'
+
+type UserRecord = {
+  createdAt: Timestamp
+  email: string
+  name: string | null
+}
+
+export type User = { id: string } & UserRecord
 
 @Injectable()
 export class UserService {
-  constructor(private prisma: PrismaService) {}
+  constructor(@Inject(FIRESTORE) private firestore: Firestore) {}
 
-  async findOne(params: Partial<User>) {
-    return await this.prisma.user.findUnique({
-      where: {
-        email: params.email,
-        id: params.id,
-      },
-    })
+  private collection() {
+    return this.firestore.collection('users') as CollectionReference<UserRecord>
   }
 
-  async create(params: Omit<User, 'id' | 'createdAt' | 'refreshToken'>) {
-    return await this.prisma.user.create({
-      data: params,
-    })
+  async findOne(id: string): Promise<User | undefined> {
+    const doc = await this.collection().doc(id).get()
+    return doc.exists ? { id: doc.id, ...(doc.data() as UserRecord) } : undefined
   }
 
-  async update(params: { id: number } & Partial<Omit<User, 'id' | 'createdAt'>>) {
-    return await this.prisma.user.update({
-      data: {
-        ...params,
-        id: undefined,
-      },
-      where: {
-        id: params.id,
-      },
-    })
+  async getOrCreate(params: { id: string; email?: string; name?: string | null }): Promise<User> {
+    const ref = this.collection().doc(params.id)
+    const existing = await ref.get()
+    if (existing.exists) {
+      return { id: existing.id, ...(existing.data() as UserRecord) }
+    }
+
+    const data: UserRecord = {
+      createdAt: Timestamp.now(),
+      email: params.email || '',
+      name: params.name ?? null,
+    }
+    await ref.set(data)
+    return { id: params.id, ...data }
+  }
+
+  async update(params: { id: string; name?: string }): Promise<User> {
+    const ref = this.collection().doc(params.id)
+    await ref.update({ ...(params.name !== undefined ? { name: params.name } : {}) })
+    const updated = await ref.get()
+    return { id: updated.id, ...(updated.data() as UserRecord) }
   }
 
   formatUser(user: User) {
     return {
-      createdAt: user.createdAt,
+      createdAt: user.createdAt.toDate().toISOString(),
       email: user.email,
       id: user.id,
       name: user.name,

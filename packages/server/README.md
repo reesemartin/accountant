@@ -2,9 +2,11 @@
 
 ## Authentication
 
-The auth module provides registration, login, and refresh token endpoints. It also provides a guard to protect routes from unauthenticated users.
+Authentication is Google Sign-In via Firebase. The client signs in with the Firebase JS SDK and sends the resulting Firebase ID token as a `Bearer` token on every request; the server never issues or stores its own session tokens.
 
-Simply add the `@UseGuards(JwtAuthGuard)` decorator to any route you want to protect. If the request does not contain a valid JWT token, the request will be rejected with a `401 Unauthorized` response.
+Simply add the `@UseGuards(FirebaseAuthGuard)` decorator to any route you want to protect. The guard verifies the ID token against Firebase Admin on every request and attaches `{ id, email }` to `req.user`. If the token is missing, invalid, or expired, the request is rejected with a `401 Unauthorized` response.
+
+`GET /api/v1/auth/me` additionally creates the caller's Firestore user profile on first call, so there's no separate registration step.
 
 ## Validation
 

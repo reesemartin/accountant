@@ -1,0 +1,21 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "transactions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "recurring", "order": "ASCENDING" },
+        { "fieldPath": "startDate", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "transactions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "recurring", "order": "ASCENDING" },
+        { "fieldPath": "startDate", "order": "DESCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

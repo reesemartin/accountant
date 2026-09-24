@@ -1,41 +1,53 @@
+import { FirebaseApp, initializeApp } from 'firebase/app'
+import {
+  Auth,
+  connectAuthEmulator,
+  getAuth,
+  GoogleAuthProvider,
+  onAuthStateChanged,
+  signInWithPopup,
+  signOut,
+  User,
+} from 'firebase/auth'
+
+const firebaseApp: FirebaseApp = initializeApp({
+  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
+  appId: process.env.REACT_APP_FIREBASE_APP_ID,
+  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
+})
+
+const firebaseAuth: Auth = getAuth(firebaseApp)
+
+if (process.env.REACT_APP_USE_FIREBASE_EMULATOR === 'true') {
+  // The emulator swaps the real Google OAuth popup for a local fake sign-in screen, so
+  // signInWithGoogle() below works fully offline against `yarn dev:emulators`.
+  connectAuthEmulator(firebaseAuth, 'http://127.0.0.1:9099', { disableWarnings: true })
+}
+
+const googleProvider = new GoogleAuthProvider()
+
 export class AuthService {
-  static getAccessToken() {
-    return localStorage.getItem('accessToken')
+  static async signInWithGoogle(): Promise<User> {
+    const result = await signInWithPopup(firebaseAuth, googleProvider)
+    return result.user
   }
 
-  static setAccessToken(token: string | null) {
-    if (!token) {
-      localStorage.removeItem('accessToken')
-      return
-    }
-    localStorage.setItem('accessToken', token)
+  static async signOut(): Promise<void> {
+    await signOut(firebaseAuth)
   }
 
-  static getRefreshToken() {
-    return localStorage.getItem('refreshToken')
+  static getCurrentUser(): User | null {
+    return firebaseAuth.currentUser
   }
 
-  static setRefreshToken(token: string | null) {
-    if (!token) {
-      localStorage.removeItem('refreshToken')
-      return
-    }
-    localStorage.setItem('refreshToken', token)
+  /** Firebase caches the token and only refreshes it over the network once it's close to expiring. */
+  static async getIdToken(): Promise<string | null> {
+    return firebaseAuth.currentUser ? firebaseAuth.currentUser.getIdToken() : null
   }
 
-  static checkToken(token?: string | null) {
-    if (!token) {
-      return false
-    }
-    let decodedToken
-    try {
-      decodedToken = JSON.parse(atob(token.split('.')[1]))
-    } catch (error) {
-      return false
-    }
-    if (decodedToken.exp * 1000 < Date.now()) {
-      return false
-    }
-    return true
+  /** Fires once Firebase has finished rehydrating any persisted session, then on every subsequent change. */
+  static onAuthStateChanged(callback: (user: User | null) => void): () => void {
+    return onAuthStateChanged(firebaseAuth, callback)
   }
 }

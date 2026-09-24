@@ -4,7 +4,7 @@ import { FC, useMemo } from 'react'
 import { useLocation } from 'react-router-dom'
 
 import { HeaderActions } from '..'
-import { AuthService } from './../../services'
+import { useFirebaseAuthState } from './../../hooks'
 
 const noHeaderActionsRoutes = ['/login', '/logout']
 
@@ -25,7 +25,8 @@ type AppLayoutProps = {
 export const AppLayout: FC<AppLayoutProps> = (props) => {
   const location = useLocation()
 
-  const isLoggedIn = AuthService.checkToken(AuthService.getRefreshToken())
+  const { user } = useFirebaseAuthState()
+  const isLoggedIn = Boolean(user)
 
   const showHeader = useMemo(() => !noHeaderActionsRoutes.includes(location.pathname), [location.pathname])
 

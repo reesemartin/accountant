@@ -34,7 +34,7 @@ export const LedgerTable: FC = () => {
   )
 
   const onDelete = useCallback(
-    (id: number) => {
+    (id: string) => {
       transactionDelete.mutateAsync({ id })
     },
     [transactionDelete],

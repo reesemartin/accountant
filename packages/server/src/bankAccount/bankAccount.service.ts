@@ -1,69 +1,80 @@
-import { Injectable } from '@nestjs/common'
-import { BankAccount, Prisma } from '@prisma/client'
+import { Inject, Injectable } from '@nestjs/common'
 
-import { PrismaService } from 'nestjs-prisma'
+import { CollectionReference, Firestore, Timestamp } from 'firebase-admin/firestore'
+
+import { FIRESTORE } from './../firebase/firebase.module'
+import { applyListQuery, stripUndefined } from './../utils'
+
+type BankAccountRecord = {
+  balance: number
+  name: string
+  createdAt: Timestamp
+}
+
+export type BankAccount = { id: string } & BankAccountRecord
 
 @Injectable()
 export class BankAccountService {
-  constructor(private prisma: PrismaService) {}
+  constructor(@Inject(FIRESTORE) private firestore: Firestore) {}
 
-  async create(data: Omit<Prisma.BankAccountCreateInput, 'createdAt' | 'id' | 'user'> & { userId: number }) {
-    return this.prisma.bankAccount.create({
-      data,
-    })
+  private collection(userId: string) {
+    return this.firestore
+      .collection('users')
+      .doc(userId)
+      .collection('bankAccounts') as CollectionReference<BankAccountRecord>
   }
 
-  async delete(params: { id: number; userId: number }) {
-    await this.prisma.bankAccount.delete({
-      where: params,
-    })
+  async create(params: { name: string; balance: number; userId: string }): Promise<BankAccount> {
+    const data: BankAccountRecord = {
+      balance: params.balance,
+      createdAt: Timestamp.now(),
+      name: params.name,
+    }
+    const ref = await this.collection(params.userId).add(data)
+    return { id: ref.id, ...data }
+  }
+
+  async delete(params: { id: string; userId: string }): Promise<void> {
+    await this.collection(params.userId).doc(params.id).delete()
   }
 
   async findMany(params: {
     name?: string
-    orderBy?: keyof BankAccount
+    orderBy?: string
     orderByDirection?: 'asc' | 'desc' | 'ASC' | 'DESC'
     skip?: number
     take?: number
-    userId: number
-  }) {
-    return this.prisma.bankAccount.findMany({
-      orderBy: {
-        [params.orderBy || 'startDate']: params.orderByDirection?.toLocaleLowerCase() || 'desc',
-      },
+    userId: string
+  }): Promise<BankAccount[]> {
+    const query = applyListQuery(this.collection(params.userId), {
+      orderBy: params.orderBy,
+      orderByDirection: params.orderByDirection,
       skip: params.skip,
       take: params.take,
-      where: {
-        name: params.name,
-        userId: params.userId,
-      },
+      where: [['name', '==', params.name]],
     })
+    const snapshot = await query.get()
+    return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
   }
 
-  async get(params: { id: number; userId: number }) {
-    return this.prisma.bankAccount.findUnique({
-      where: params,
-    })
+  async get(params: { id: string; userId: string }): Promise<BankAccount | undefined> {
+    const doc = await this.collection(params.userId).doc(params.id).get()
+    return doc.exists ? { id: doc.id, ...(doc.data() as BankAccountRecord) } : undefined
   }
 
-  async update(params: {
-    id: number
-    userId: number
-    data: Omit<Prisma.BankAccountUpdateInput, 'createdAt' | 'user'>
-  }) {
-    return this.prisma.bankAccount.update({
-      data: params.data,
-      where: {
-        id: params.id,
-        userId: params.userId,
-      },
-    })
+  async update(params: { id: string; userId: string; data: Partial<Pick<BankAccountRecord, 'balance' | 'name'>> }) {
+    const ref = this.collection(params.userId).doc(params.id)
+    await ref.update(stripUndefined(params.data))
+    const updated = await ref.get()
+    return { id: updated.id, ...(updated.data() as BankAccountRecord) }
   }
 
   formatBankAccount(bankAccount: BankAccount) {
     return {
-      ...bankAccount,
-      balance: Number(bankAccount.balance),
+      balance: bankAccount.balance,
+      createdAt: bankAccount.createdAt.toDate().toISOString(),
+      id: bankAccount.id,
+      name: bankAccount.name,
     }
   }
 }

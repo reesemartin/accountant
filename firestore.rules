@@ -1,0 +1,25 @@
+rules_version = '2';
+
+// The server (Firebase Admin SDK, via the Netlify function) bypasses these rules entirely and is the
+// only thing that talks to Firestore today. This file is defense-in-depth: it makes sure that even if
+// a Firebase ID token were ever used to call Firestore directly from a browser, a signed-in user could
+// only ever read or write their own data.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+
+      match /bankAccounts/{bankAccountId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+
+      match /transactions/{transactionId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -50,11 +50,10 @@ export class ApiQueryService {
     cancelToken?: CancelToken
     params?: unknown
   }): Promise<T> {
-    await this.tokenCheck()
     const response = await axios
       .get(`${this.apiUrl}${this.formatEndpoint(event.endpoint)}`, {
         cancelToken: event.cancelToken,
-        headers: this.setHeaders(event.headers),
+        headers: await this.setHeaders(event.headers),
         params: event.params,
       })
       .catch((error) => {
@@ -66,30 +65,27 @@ export class ApiQueryService {
   }
 
   public async post<T>(event: { endpoint: string; data?: unknown; headers?: Record<string, string> }): Promise<T> {
-    await this.tokenCheck()
     const response = await axios
       .post(`${this.apiUrl}${this.formatEndpoint(event.endpoint)}`, event.data, {
-        headers: this.setHeaders(event.headers),
+        headers: await this.setHeaders(event.headers),
       })
       .catch(this.handleError)
     return response?.data
   }
 
   public async patch<T>(event: { endpoint: string; data?: unknown; headers?: Record<string, string> }): Promise<T> {
-    await this.tokenCheck()
     const response = await axios
       .patch(`${this.apiUrl}${this.formatEndpoint(event.endpoint)}`, event.data, {
-        headers: this.setHeaders(event.headers),
+        headers: await this.setHeaders(event.headers),
       })
       .catch(this.handleError)
     return response?.data
   }
 
   public async delete<T>(event: { endpoint: string; headers?: Record<string, string> }): Promise<T> {
-    await this.tokenCheck()
     const response = await axios
       .delete(`${this.apiUrl}${this.formatEndpoint(event.endpoint)}`, {
-        headers: this.setHeaders(event.headers),
+        headers: await this.setHeaders(event.headers),
       })
       .catch(this.handleError)
     return response?.data
@@ -120,46 +116,11 @@ export class ApiQueryService {
     return endpoint
   }
 
-  private async tokenCheck() {
-    const refreshToken = AuthService.getRefreshToken()
-    if (!refreshToken) {
-      // not logged in so nothing to refresh
-      return
-    }
-
-    if (!AuthService.checkToken(refreshToken)) {
-      // refresh token is expired so don't try refreshing
-      // TODO: Trigger logout
-      return
-    }
-
-    if (!AuthService.checkToken(AuthService.getAccessToken())) {
-      await this.refreshTokens()
-    }
-  }
-
-  private async refreshTokens() {
-    const response = await axios
-      .get<{
-        accessToken: string
-        refreshToken: string
-      }>(`${this.apiUrl}/api/v1/auth/refresh`, {
-        headers: this.setHeaders({
-          Authorization: `Bearer ${AuthService.getRefreshToken()}`,
-        }),
-      })
-      .catch(this.handleError)
-    if (!response?.data?.accessToken || !response?.data?.refreshToken) {
-      throw new Error('Unable to refresh tokens')
-    }
-    AuthService.setAccessToken(response.data.accessToken)
-    AuthService.setRefreshToken(response.data.refreshToken)
-  }
-
-  private setHeaders(headers?: Record<string, string>): Record<string, string> {
-    const accessToken = AuthService.getAccessToken()
+  private async setHeaders(headers?: Record<string, string>): Promise<Record<string, string>> {
+    // Firebase caches the ID token and only hits the network to refresh it when it's close to expiring.
+    const idToken = await AuthService.getIdToken()
     return {
-      ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+      ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
       'Content-Type': 'application/json',
       ...headers,
     }

@@ -17,7 +17,7 @@ import {
 import dayjs from 'dayjs'
 import { Request } from 'express'
 
-import { JwtAuthGuard } from './../auth/jwtAuth.guard'
+import { FirebaseAuthGuard } from './../firebase/firebaseAuth.guard'
 import { classTransformValidate } from './../utils'
 import { TransactionCreateDTO, TransactionFindManyDTO, TransactionUpdateDTO } from './transaction.model'
 import { TransactionService } from './transaction.service'
@@ -31,64 +31,67 @@ export class TransactionController {
   }
 
   @Post()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(FirebaseAuthGuard)
   async create(@Body() body: TransactionCreateDTO, @Req() req: Request) {
-    return this.transactionService.create({
+    const transaction = await this.transactionService.create({
       ...body,
-      userId: req.user.id,
+      userId: req.user!.id,
     })
+    return this.transactionService.formatTransaction(transaction)
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(FirebaseAuthGuard)
   async delete(@Param('id') id: string, @Req() req: Request) {
     if (!id) {
       throw new BadRequestException('Transaction ID is required')
     }
-    return this.transactionService.delete({ id: Number(id), userId: req.user.id })
+    return this.transactionService.delete({ id, userId: req.user!.id })
   }
 
   @Get(':id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(FirebaseAuthGuard)
   async get(@Param('id') id: string, @Req() req: Request) {
     if (!id) {
       throw new BadRequestException('Transaction ID is required')
     }
-    const transaction = await this.transactionService.get({ id: Number(id), userId: req.user.id })
+    const transaction = await this.transactionService.get({ id, userId: req.user!.id })
     if (!transaction) {
       throw new NotFoundException('Transaction not found')
     }
-    return transaction
+    return this.transactionService.formatTransaction(transaction)
   }
 
   @Get()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(FirebaseAuthGuard)
   async findMany(@Query() query: Record<string, string>, @Req() req: Request) {
     const validatedQuery = await classTransformValidate<TransactionFindManyDTO>(TransactionFindManyDTO, query)
-    return this.transactionService.findMany({
+    const transactions = await this.transactionService.findMany({
       ...validatedQuery,
       end: validatedQuery.end ? dayjs(validatedQuery.end).toDate() : undefined,
       start: validatedQuery.start ? dayjs(validatedQuery.start).toDate() : undefined,
-      userId: req.user.id,
+      userId: req.user!.id,
     })
+    return transactions.map((transaction) => this.transactionService.formatTransaction(transaction))
   }
 
   @Patch(':id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(FirebaseAuthGuard)
   async update(@Param('id') id: string, @Body() body: TransactionUpdateDTO, @Req() req: Request) {
     if (!id) {
       throw new BadRequestException('Transaction ID is required')
     }
 
-    const existingTransaction = await this.transactionService.get({ id: Number(id), userId: req.user.id })
-    if (!existingTransaction || existingTransaction.userId !== req.user.id) {
+    const existingTransaction = await this.transactionService.get({ id, userId: req.user!.id })
+    if (!existingTransaction) {
       throw new NotFoundException('Transaction not found')
     }
 
-    return this.transactionService.update({
+    const transaction = await this.transactionService.update({
       data: body,
-      id: Number(id),
-      userId: req.user.id,
+      id,
+      userId: req.user!.id,
     })
+    return this.transactionService.formatTransaction(transaction)
   }
 }
